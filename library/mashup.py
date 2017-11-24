@@ -1,14 +1,8 @@
 # -*- coding: utf8 -*-
 #!/usr/bin/env python27
-###Import Preprocessing module###
-import sys
-path = '../Preprocessing/'
-sys.path.append(path)
-from pre import *
-# Do not know how to import elegantly QQ
-###
 import librosa
 
+from pre import *
 
 class mash:
     """
@@ -55,8 +49,7 @@ class mash:
 
 
 if __name__ == '__main__':
-    # song = mash('../pgz/田馥甄 - 小幸運 (原版伴奏)_1.pgz', '../pgz/田馥甄 - 小幸運 (原版伴奏)_1.pgz')
-    song = mash('../test.pgz', '../test.pgz')
+    song = mash('../../test.pgz', '../../test.pgz')
     song.output('ori.wav')
     song.time_stretch(2)
     song.output('./mix.wav')

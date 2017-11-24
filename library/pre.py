@@ -20,10 +20,12 @@ class PreAudio:
     chroma
     tempo
     spec
+    adjusted_signal
 
     ---Method---
     visualize (mode):
         Visualize the wave ,mode= wave, chromagram or spectrogram
+    stretch_wav(frameCount)
     """
 
     def __init__(self, filename):
@@ -54,27 +56,16 @@ class PreAudio:
             plt.title('spectrogram')
             plt.show()
         elif mode =='all':
-            librosa.display.waveplot(self.signal, sr=self.sr)
-            plt.title('wave')
-            plt.show()
-            plt.figure(figsize=(10, 4))
-            librosa.display.specshow(
-                self.chroma, y_axis='chroma', x_axis='time', sr=self.sr)
-            plt.colorbar()
-            plt.title('chromagram')
-            plt.tight_layout()
-            plt.show()
-            librosa.display.specshow(librosa.power_to_db(self.spec, ref=np.max),
-                                     y_axis='mel', fmax=8000,
-                                     x_axis='time')
-            plt.colorbar(format='%+2.0f dB')
-            plt.tight_layout()
-            plt.title('spectrogram')
-            plt.show()
-
+            self.visualize('wave')
+            self.visualize('chromagram')
+            self.visualize('spectrogram')
         else:
             print "ERROR : Mode Error"
 
+    def stretch_seg(self, frameCount):
+        print self.signal.shape
+        self.adjusted_signal = librosa.effects.time_stretch(self.signal,frameCount/self.signal.shape[1])
+        print self.signal.shape, self.adjusted_signal.shape
 
 class Mashability:
     '''
@@ -169,7 +160,7 @@ def write(filePath, savePath):
 def preprocessing(inputPath, outputPath):
     '''
     do "write" method on all .wav in "inputPath", which converted all .wav in
-    the inputPath, create their PreAudio instances and save them to outputPath
+    the inputPath, create PreAudio instance and save it in outputPath
     ---parameter---
     inputPath = folder path of all input .wav
     outputPath = folder path to save .pgz file
@@ -192,5 +183,5 @@ def load(filePath):
 if __name__ == '__main__':
     # f = load('../pgz/田馥甄 - 小幸運 (原版伴奏)_1.pgz')
     # f2 = load('../pgz/田馥甄 - 小幸運 (原版伴奏)_2.pgz')
-    f = load('./mix.pgz')
-    f.visualize('all')
+    f.stretch_seg(100)
+    # f.visualize('all')
