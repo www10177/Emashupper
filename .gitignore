@@ -107,4 +107,4 @@ ENV/
 .DS_Store
 
 #vim swp file
-.swp
+*.swp
