@@ -1,6 +1,7 @@
 # -*- coding: utf8 -*-
 #!/usr/bin/env python27
 
+from __future__ import division
 import os
 import librosa
 import librosa.display
@@ -16,20 +17,22 @@ class PreAudio:
     """
     Class to store the characteristic data of wave
     ---member---
+    name
     signal, sr
     chroma
     tempo
     spec
-    adjusted_signal
 
     ---Method---
     visualize (mode):
         Visualize the wave ,mode= wave, chromagram or spectrogram
-    stretch_wav(frameCount)
+    stretch_seg(frameCount):
+        stretch signal to specific frame
     """
 
-    def __init__(self, filename):
-        self.signal, self.sr = librosa.load(filename)
+    def __init__(self, filePath):
+        self.name = os.path.splitext(os.path.basename(filePath))[0]
+        self.signal, self.sr = librosa.load(filePath)
         self.chroma = librosa.feature.chroma_stft(self.signal)
         self.tempo = librosa.beat.tempo(self.signal)
         self.spec = librosa.feature.melspectrogram(self.signal, sr=self.sr)
@@ -55,7 +58,7 @@ class PreAudio:
             plt.tight_layout()
             plt.title('spectrogram')
             plt.show()
-        elif mode =='all':
+        elif mode == 'all':
             self.visualize('wave')
             self.visualize('chromagram')
             self.visualize('spectrogram')
@@ -63,9 +66,52 @@ class PreAudio:
             print "ERROR : Mode Error"
 
     def stretch_seg(self, frameCount):
-        print self.signal.shape
-        self.adjusted_signal = librosa.effects.time_stretch(self.signal,frameCount/self.signal.shape[1])
-        print self.signal.shape, self.adjusted_signal.shape
+        # parameter should be tuned
+        approach_para = 0.001  # decrease or increase multiplier if frame difference is too big
+        difference_upbound = 10
+        # if difference of two signal frame is bigger than difference_upbound,
+        # multiplier would be adjusted
+        approach_para_mul = 1  # increase the speed of approach
+
+        ori = self
+        multiplier = ori.chroma.shape[1]/frameCount
+        count = 1
+        #aprroaching if frame count is not same
+        #but it should be useless right now QQ
+        while self.chroma.shape[1] != frameCount:
+            self.signal = librosa.effects.time_stretch(ori.signal, multiplier)
+            self.chroma = librosa.feature.chroma_stft(self.signal)
+            speedon = False
+            if count != 1 and difference == self.chroma.shape[1]-frameCount:
+                speedon = True
+
+            # diff of frameCount and adjusted signal
+            difference = self.chroma.shape[1]-frameCount
+            if difference < 0:
+                # signal after adjusted is too short
+                multiplier -= approach_para * (approach_para_mul
+                                               if speedon else 1)
+            elif difference > difference_upbound:
+                # signal after adjusted is too long
+                multiplier += approach_para * (approach_para_mul
+                                               if speedon else 1)
+            elif difference > 0:
+                # signal after adjusted is slightly longer than frameCount
+                # trim off last frame
+                self.signal = self.signal[:frameCount]
+            print 'count : ', count, ' difference : ', difference , self.chroma.shape[1]
+            break
+            count += 1
+        self.chroma = librosa.feature.chroma_stft(self.signal)
+        self.tempo = librosa.beat.tempo(self.signal)
+        self.spec = librosa.feature.melspectrogram(self.signal, sr=self.sr)
+        print 'adjusted : ',self.name, ' with ', count -1, ' times aprroaching'
+
+    def save(self, savePath):
+        with gzip.open(os.path.join(savePath, self.name+'.pgz'), 'wb') as pgz:
+            cPickle.dump(self, pgz)
+        print "create ", self.name
+
 
 class Mashability:
     '''
@@ -151,10 +197,7 @@ def write(filePath, savePath):
     savePath = output .pgz file path
     '''
     f = PreAudio(filePath)
-    fileName = os.path.splitext(os.path.basename(filePath))[0] + '.pgz'
-    with gzip.open(os.path.join(savePath, fileName), 'wb') as pgz:
-        cPickle.dump(f, pgz)
-    print "create ", fileName
+    f.save(savePath)
 
 
 def preprocessing(inputPath, outputPath):
@@ -181,7 +224,11 @@ def load(filePath):
 
 
 if __name__ == '__main__':
-    # f = load('../pgz/田馥甄 - 小幸運 (原版伴奏)_1.pgz')
-    # f2 = load('../pgz/田馥甄 - 小幸運 (原版伴奏)_2.pgz')
-    f.stretch_seg(100)
-    # f.visualize('all')
+    # preprocessing('../../wav/','../../pgz')
+    for path,dir, files in os. walk('../../small'):
+        for fi in files :
+            if fi.endswith('csv'):
+                continue
+            f = load('../../small/' + fi)
+            f.stretch_seg(899)
+            librosa.output.write_wav(fi[:-3]+'wav', f.signal,f.sr)
