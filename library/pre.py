@@ -67,45 +67,33 @@ class PreAudio:
 
     def stretch_seg(self, frameCount):
         # parameter should be tuned
-        approach_para = 0.001  # decrease or increase multiplier if frame difference is too big
-        difference_upbound = 10
+        approach_para = 0.00001  # decrease or increase multiplier if the frame after adjusted is not equal to frameCount
+        # difference_upbound = 10
         # if difference of two signal frame is bigger than difference_upbound,
         # multiplier would be adjusted
-        approach_para_mul = 1  # increase the speed of approach
+        # approach_para_mul = 1  # increase the speed of approach
 
-        ori = self
-        multiplier = ori.chroma.shape[1]/frameCount
+        ori= self.signal
+        multiplier = self.chroma.shape[1]/frameCount
         count = 1
-        #aprroaching if frame count is not same
-        #but it should be useless right now QQ
+        # aprroaching if frame count is not same
+        # but it should be useless right now QQ
         while self.chroma.shape[1] != frameCount:
-            self.signal = librosa.effects.time_stretch(ori.signal, multiplier)
+            self.signal = librosa.effects.time_stretch(ori, multiplier)
             self.chroma = librosa.feature.chroma_stft(self.signal)
-            speedon = False
-            if count != 1 and difference == self.chroma.shape[1]-frameCount:
-                speedon = True
-
-            # diff of frameCount and adjusted signal
             difference = self.chroma.shape[1]-frameCount
             if difference < 0:
                 # signal after adjusted is too short
-                multiplier -= approach_para * (approach_para_mul
-                                               if speedon else 1)
-            elif difference > difference_upbound:
-                # signal after adjusted is too long
-                multiplier += approach_para * (approach_para_mul
-                                               if speedon else 1)
+                multiplier -= approach_para
             elif difference > 0:
-                # signal after adjusted is slightly longer than frameCount
-                # trim off last frame
-                self.signal = self.signal[:frameCount]
-            print 'count : ', count, ' difference : ', difference , self.chroma.shape[1]
-            break
+                # signal after adjusted is too long
+                multiplier += approach_para
+            # print 'count : ', count, ' difference : ', difference, self.chroma.shape[1]
             count += 1
         self.chroma = librosa.feature.chroma_stft(self.signal)
         self.tempo = librosa.beat.tempo(self.signal)
         self.spec = librosa.feature.melspectrogram(self.signal, sr=self.sr)
-        print 'adjusted : ',self.name, ' with ', count -1, ' times aprroaching'
+        print 'adjusted : ', self.name, ' with ', count - 1, ' times aprroaching',' with multiplier = ', multiplier
 
     def save(self, savePath):
         with gzip.open(os.path.join(savePath, self.name+'.pgz'), 'wb') as pgz:
@@ -225,10 +213,8 @@ def load(filePath):
 
 if __name__ == '__main__':
     # preprocessing('../../wav/','../../pgz')
-    for path,dir, files in os. walk('../../small'):
-        for fi in files :
-            if fi.endswith('csv'):
-                continue
-            f = load('../../small/' + fi)
-            f.stretch_seg(899)
-            librosa.output.write_wav(fi[:-3]+'wav', f.signal,f.sr)
+    for path, dir, files in os. walk('../../pgz'):
+        for fi in files:
+            if fi.endswith('pgz'):
+                f = load('../../pgz/' + fi)
+                f.stretch_seg(899)
