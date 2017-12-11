@@ -2,8 +2,7 @@ import sys
 import os
 from sets import Set
 sys.path.append('../library')
-from pre import *
-
+import librosa
 
 def encodingPrint(string):
     # a = '\n'.join(string)
@@ -14,15 +13,15 @@ def encodingPrint(string):
 
 if len(sys.argv) != 3:
     print(
-        "this small program will calculate the frame all segmented pgz file in the source folder,\ncalculate the means and save the result as csvs to the destination.\nUSAGE: python calFrame.py SOURCEFOLDER DESTINATION")
+        "this small program will calculate the frame all segmented wav file in the source folder,\ncalculate the means and save the result as csvs to the destination.\nUSAGE: python calFrame.py SOURCEFOLDER DESTINATION")
 else:
     a = ''
     song_list = []
     # file extension checking and processing file name to song list
     for path, folders, files in os.walk(sys.argv[1]):
         for f in files:
-            if f.endswith('.pgz'):
-                f = f[:-4] # to trim .pgz off
+            if f.endswith('.wav'):
+                f = f[:-4] # to trim .wav off
                 f = filter(lambda x: not (x.isdigit() or x == '_'), f) # to trim _1, _2, _3... off(number of song seg)_
                 song_list.append(f)
     song_list = list(Set(song_list)) # list of all song (no duplicate)
@@ -32,15 +31,15 @@ else:
     # get frame of each song
     for path, folders, files in os.walk(sys.argv[1]):
         for f in files :
-            if not f.endswith('.pgz'):
+            if not f.endswith('.wav'):
                 continue
-            fTrim = f[:-4] # to trim .pgz off
+            fTrim = f[:-4] # to trim .wav off
             fTrim = filter(lambda x: not (x.isdigit() or x == '_'), fTrim) # to trim _1, _2, _3... off(number of song seg)_
             if not fTrim in song_dict:
                 encodingPrint(f + ' is not in song list')
                 continue
-            fWave = load(os.path.join(path,f))
-            song_dict[fTrim][0] += fWave.chroma.shape[1] # add frame count to dict
+            fWave, y = librosa.load(os.path.join(path,f))
+            song_dict[fTrim][0] += librosa.stft(fWave).shape[1] # add frame count to dict
             song_dict[fTrim][1] += 1 # add segmentation count
 
     encodingPrint('('+str(v[0])+', '+str(v[1])+')\t' + k for k,v in song_dict.iteritems())

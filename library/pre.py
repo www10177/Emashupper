@@ -67,13 +67,15 @@ class PreAudio:
 
     def stretch_seg(self, frameCount):
         # parameter should be tuned
-        approach_para = 0.00001  # decrease or increase multiplier if the frame after adjusted is not equal to frameCount
-        # difference_upbound = 10
+        # decrease or increase multiplier if the frame after adjusted is not
+        # equal to frameCount
+        approach_para = 0.00001
+        # # difference_upbound = 10
         # if difference of two signal frame is bigger than difference_upbound,
         # multiplier would be adjusted
-        # approach_para_mul = 1  # increase the speed of approach
+        # # approach_para_mul = 1  # increase the speed of approach
 
-        ori= self.signal
+        ori = self.signal
         multiplier = self.chroma.shape[1]/frameCount
         count = 1
         # aprroaching if frame count is not same
@@ -88,17 +90,18 @@ class PreAudio:
             elif difference > 0:
                 # signal after adjusted is too long
                 multiplier += approach_para
-            # print 'count : ', count, ' difference : ', difference, self.chroma.shape[1]
+            # print 'count : ', count, ' difference : ', difference,
+            # self.chroma.shape[1]
             count += 1
         self.chroma = librosa.feature.chroma_stft(self.signal)
         self.tempo = librosa.beat.tempo(self.signal)
         self.spec = librosa.feature.melspectrogram(self.signal, sr=self.sr)
-        print 'adjusted : ', self.name, ' with ', count - 1, ' times aprroaching',' with multiplier = ', multiplier
+        print 'adjusted : ', self.name, ' with ', count - 1, ' times aprroaching', ' with multiplier = ', multiplier
 
     def save(self, savePath):
         with gzip.open(os.path.join(savePath, self.name+'.pgz'), 'wb') as pgz:
             cPickle.dump(self, pgz)
-        print "create ", self.name
+        # print "create ", self.name
 
 
 class Mashability:
