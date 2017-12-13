@@ -41,21 +41,24 @@ class mash:
     def pitch_shift(self, n_step):
         self.candSig = librosa.effects.pitch_shift(self.candSig, self.candSr, n_step)
 
-    def volume_adjust(self):
-        '''
-        pydub can be use ,but need to re-read songs from wav
-        Didn't find a good way to normalize volume now
-        '''
-        '''
-            def match_target_amplitude(sound, target_dBFS):
-            change_in_dBFS = target_dBFS - sound.dBFS
-            return sound.apply_gain(change_in_dBFS)
+    def volume_adjust(self,input_file):
+        import subprocess
+            import shlex
+            '''
+                Command format: " ffmpeg-normalize -v <input> "
+                e.g. "ffmpeg-normalize -v ../wav/'Shape Of You (Instrumental)_2.wav'"
+                File will be named by " normalized-<input> "
+                e.g. "normalized-Shape Of You (Instrumental)_2.wav"
+                '''
             
-            sound = AudioSegment.from_wav("audio.wav")
-            normalized_sound = match_target_amplitude(sound, -20.0)
-            normalized_sound.export("nomrmalizedAudio.wav", format="wav")
-        '''
-        print 'volume'
+            FFMPEG_CMD = "ffmpeg-normalize"
+            #input_path = "../wav/"
+            #input_file = "'Ed Sheeran - Shape Of You (Instrumental)_4.wav'"
+            #cmd = FFMPEG_CMD + ' -v ' + input_path + input_file
+            cmd = FFMPEG_CMD + ' -v ' + input_file
+            #cmd = "ffmpeg-normalize -v ../wav/'Ed Sheeran - Shape Of You (Instrumental)_2.wav'"
+            p = subprocess.Popen(shlex.split(cmd))
+
     
     def bridging(self,fade_in_time=300,fade_out_time=300):
         ''' Default: 0.3sec fade in & out '''
@@ -71,3 +74,4 @@ if __name__ == '__main__':
     song.output('ori.wav')
     song.time_stretch(2)
     song.output('./mix.wav')
+    #song.volume_adjust('ori.wav')
