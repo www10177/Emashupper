@@ -1,6 +1,7 @@
 # -*- coding: utf8 -*-
 #!/usr/bin/env python27
 import librosa
+from pydub import AudioSegment
 
 from pre import *
 
@@ -35,17 +36,34 @@ class mash:
         librosa.output.write_wav(path, self.resultSig, self.resultSr)
 
     def time_stretch(self, multiplier):
-        self.candSig= librosa.effects.time_stretch(self.candSig,multiplier)
+        self.candSig = librosa.effects.time_stretch(self.candSig,multiplier)
 
     def pitch_shift(self, n_step):
-        self.candSig= librosa.effects.pitch_shift(self.candSig, self.candSr, n_step)
+        self.candSig = librosa.effects.pitch_shift(self.candSig, self.candSr, n_step)
 
     def volume_adjust(self):
         '''
         pydub can be use ,but need to re-read songs from wav
         Didn't find a good way to normalize volume now
         '''
+        '''
+            def match_target_amplitude(sound, target_dBFS):
+            change_in_dBFS = target_dBFS - sound.dBFS
+            return sound.apply_gain(change_in_dBFS)
+            
+            sound = AudioSegment.from_wav("audio.wav")
+            normalized_sound = match_target_amplitude(sound, -20.0)
+            normalized_sound.export("nomrmalizedAudio.wav", format="wav")
+        '''
         print 'volume'
+    
+    def bridging(self,fade_in_time=300,fade_out_time=300):
+        ''' Default: 0.3sec fade in & out '''
+        self.candSig = self.candSig.fade_in(fade_in_time).fade_out(fade_out_time)
+
+
+    def overlay(self):
+        print 'overlay'
 
 
 if __name__ == '__main__':
