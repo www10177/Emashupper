@@ -1,7 +1,6 @@
 import sys
 import os
 from sets import Set
-sys.path.append('../library')
 import librosa
 
 def encodingPrint(string):
