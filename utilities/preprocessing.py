@@ -1,7 +1,9 @@
 import sys
 import os
 from sets import Set
-from .. import lib.pre
+import sys
+sys.path.insert(0,'..')
+import lib.pre
 from  pandas import read_csv
 
 def find(dataframe, name):
