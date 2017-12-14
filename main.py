@@ -2,8 +2,9 @@
 import librosa
 from pandas import read_csv
 import os
-# from library import pre
+import numpy as np
 from lib import pre
+
 
 #Paramaeters
 PgzLocation= '../pgz/'
@@ -30,10 +31,11 @@ id = input("Please Enter ID...")
 seed_seg_count = csv['segmentation count'][id]
 seedname = csv['song name'][id]
 seed = [None] * seed_seg_count
-pre.load('../pgz/田馥甄 - 小幸運 (原版伴奏)_1.pgz')
 for i in xrange(0,seed_seg_count):
     name = os.path.join(PgzLocation,seedname+'_'+str(i+1)+'.pgz')
-    print name
-    seed[i] = load(name)
+    seed[i] = pre.load(name)
     print 'loaded ',seed[i].name
-
+signal = seed[0].signal
+for i in seed:
+    print i.name,i.signal.shape
+    signal = np.concatenate((signal,i.signal))
