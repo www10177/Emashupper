@@ -2,6 +2,7 @@ from Tkinter import *
 from lib import pre
 from pandas import read_csv
 import os
+from subprocess import call,Popen
 import numpy as np
 import matplotlib.pyplot as plt
 import librosa.display
@@ -24,6 +25,8 @@ class Application(Frame):
         self.seedIndex= -1
         self.seedSegCount=-1
         self.seedName = ''
+        self.seed = [None] * self.seedSegCount #PreAudio list of seed song
+        self.mashup= [None]*self.seedSegCount #PreAudio list of selected candidated song
 
     def initUI(self):
         #initialize UI
@@ -69,19 +72,69 @@ class Application(Frame):
         plt.title('Seed Wave')
         plt.show()
 
+    def playSeed(self):
+        if sys.platform == 'darwin':
+            Popen(["afplay",os.path.join(WavLocation,self.seedName+'_1.wav')])
 
+    def mashupSong(self):
+        self.mashup= [None]*self.seedSegCount
+        for seedSegNow in xrange(0,self.seedSegCount):
+        # iterate all segmentations in seed song
+            maxMashability = -1000
+            candSeg=None
+            maxSeg =None
+            for candIndex,candName in enumerate(self.csv['song name']):
+            # iterate all songs in database
+                if candIndex == self.seedIndex:
+                    continue
+                for candSegIndex in xrange(1,self.csv['segmentation count'][candIndex]+1):
+                # iterate all segmentations in candidate song
+                    candSegPath = os.path.join(PgzLocation,candName+'_'+str(candSegIndex)+'.pgz')
+                    candSeg = pre.load(candSegPath)
+                    mash = pre.Mashability(self.seed[seedSegNow], candSeg).mash()
+                    if maxMashability < mash:
+                        maxMashability = mash
+                        maxSeg = candSeg
+                print 'compared :',candName
+                if maxSeg is not None:
+                    print 'maxSeg = ',maxSeg.name
+            print 'Mashed : #',seedSegNow+1 ,' of ', self.seedSegCount
+            self.mashup[seedSegNow] =maxSeg 
+        print 'selected : '
+        for i in self.mashup:
+            print i.name
+
+    def saveMashuped(self):
+    # !!WARNING!! Only saved candidate song, need to add seed song together !!WARNING!!
+        signal = self.mashup[0].signal
+        print len(self.mashup)
+        for i in self.mashup[1:]:
+            signal = np.concatenate((signal,i.signal))
+        librosa.output.write_wav('./mashuped.wav',signal,self.seed[0].sr)
+    def playMashuped(self):
+        self.saveMashuped()
+        if sys.platform == 'darwin':
+            Popen(["afplay",'./mashuped.wav'])
+    def showMashuped(self):
+        signal = self.mashup[0].signal
+        for i in self.mashup[1:]:
+            signal = np.concatenate((signal,i.signal))
+        librosa.display.waveplot(signal, sr=self.seed[0].sr)
+        plt.title('Mashuped Wave')
+        plt.show()
+
+        
     def actionElements(self):
         # initialze buttons,labels...
-
         Button(self,text='-> Load ',command=self.load).grid(row=1,column=2,sticky='WE')
         Label(self,text="---------Seed---------").grid(row=2,column=2,sticky='WE')
-        Button(self,text='Play Seed Song').grid(row=3,column=2,sticky='WE')
+        Button(self,text='Play Seed Song',command=self.playSeed).grid(row=3,column=2,sticky='WE')
         Button(self,text='Show Seed Wave',command=self.seedShow).grid(row=4,column=2,sticky='WE')
         Label(self,text="---------Mash---------").grid(row=5,column=2,sticky='WE')
-        Button(self,text='*Mashup*').grid(row=6,column=2,sticky='WE')
-        Button(self,text='Play Mashuped Song').grid(row=7,column=2,sticky='WE')
-        Button(self,text='Show Mashuped Wave').grid(row=8,column=2,sticky='WE')
-        Button(self,text='<- Save Mashuped Song').grid(row=9,column=2,sticky='WE')
+        Button(self,text='*Mashup*',command=self.mashupSong).grid(row=6,column=2,sticky='WE')
+        Button(self,text='Play Mashuped Song',command=self.playMashuped).grid(row=7,column=2,sticky='WE')
+        Button(self,text='Show Mashuped Wave',command=self.showMashuped).grid(row=8,column=2,sticky='WE')
+        Button(self,text='<- Save Mashuped Song',command=self.saveMashuped).grid(row=9,column=2,sticky='WE')
 
 
 if __name__ == '__main__':
@@ -89,6 +142,6 @@ if __name__ == '__main__':
     print 'wav : ', WavLocation
     root = Tk()
     app = Application(root)
-    root.geometry('860x640')
+    root.geometry('640x480')
     root.mainloop()
     root.destroy()

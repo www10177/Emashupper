@@ -33,26 +33,29 @@ class Mashability:
         self.seed = seed
         self.cand = candidate
 
+
     def cosine(self, vec1, vec2):
         average = 0.0
         product = vec1D = vec2D = 0.0
         for chromaC, chroma in enumerate(vec1):
+            if vec1[chromaC] ==0 or vec2[chromaC]==0:
+                # to deal with bugs of chromagram = 0
+                continue
             product += vec1[chromaC]*vec2[chromaC]
             vec1D += pow(vec1[chromaC], 2)
             vec2D += pow(vec2[chromaC], 2)
-
+        if vec1D == 0 or vec2D ==0 :
+            return 0
         return product / (sqrt(vec1D) * sqrt(vec2D))
 
     def chroma(self):
         chroma = 0.0
         seedC = self.seed.chroma.transpose()
         candC = self.cand.chroma.transpose()
-        if seedC.shape != candC.shape:
-            print "the shape of two chromagram is not premitted"
-            # raise None
         for i, frame in enumerate(seedC):
-            if i >= candC.shape[0]:
+            if i >= candC.shape[0] :
                 break
+            # print seedC[i],candC[i]
             chroma += self.cosine(seedC[i], candC[i])
         return chroma/seedC.shape[0]
 
@@ -65,8 +68,12 @@ class Mashability:
         seed = self.seed.spec.transpose()
         cand = self.cand.spec.transpose()
         result = np.array([])
+        # print seed.shape, cand.shape
         for frameC, frame in enumerate(seed):
             sum = 0
+            if frameC >= cand.shape[0]:
+                # print 'spectal braeak'
+                break
             for sC, spec in enumerate(seed[frameC]):
                 sum += seed[frameC][sC] + cand[frameC][sC]
             result = np.append(result, sum / seed[frameC].shape[0])
@@ -75,8 +82,8 @@ class Mashability:
         result = sumToUnity(result)
         return 1-np.mean(result)
 
-    def mash(self):
-        return {
-            'chroma': self.chroma(),
-            'rhythm': self.rhythm(),
-            'spectral': self.spectral()}
+    def mash(self,chroma =0.7, rhythm=0.2, spectral =0.1):
+        c=self.chroma()
+        r=self.rhythm()
+        s=self.spectral()
+        return c*chroma+r*rhythm+s*spectral
