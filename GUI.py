@@ -114,17 +114,24 @@ class Application(Frame):
     # !!WARNING!! Only saved candidate song, need to add seed song together !!WARNING!!
         signal = self.mashup[0].signal
         print len(self.mashup)
+            ###########
         for i in self.mashup[1:]:
             signal = np.concatenate((signal,i.signal))
+        
+        
         librosa.output.write_wav('./mashuped.wav',signal,self.seed[0].sr)
+            
     def playMashuped(self):
         self.saveMashuped()
         if sys.platform == 'darwin':
             Popen(["afplay",'./mashuped.wav'])
+
     def showMashuped(self):
         signal = self.mashup[0].signal
         for i in self.mashup[1:]:
             signal = np.concatenate((signal,i.signal))
+        ############
+        
         librosa.display.waveplot(signal, sr=self.seed[0].sr)
         plt.title('Mashuped Wave')
         plt.show()
@@ -148,6 +155,7 @@ if __name__ == '__main__':
     print 'wav : ', WavLocation
     root = Tk()
     app = Application(root)
-    root.geometry('640x480')
+    root.geometry('1280x720')
+    #root.geometry('640x480')
     root.mainloop()
-    root.destroy()
+    #root.destroy()
