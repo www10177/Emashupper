@@ -16,9 +16,5 @@ def volume_adjust(input_file):
         '''
     
     FFMPEG_CMD = "ffmpeg-normalize"
-    #input_path = "../wav/"
-    #input_file = "'Ed Sheeran - Shape Of You (Instrumental)_4.wav'"
-    #cmd = FFMPEG_CMD + ' -v ' + input_path + input_file
-    cmd = FFMPEG_CMD + ' -v ' + input_file
-    #cmd = "ffmpeg-normalize -v ../wav/'Ed Sheeran - Shape Of You (Instrumental)_2.wav'"
+    cmd = FFMPEG_CMD + ' -v -f ' + input_file
     p = subprocess.Popen(shlex.split(cmd))

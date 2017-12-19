@@ -1,3 +1,9 @@
+# -*- coding:utf-8 -*-
+from sys import platform as sys_pf
+if sys_pf == 'darwin':
+    import matplotlib
+    matplotlib.use("TkAgg")
+
 from Tkinter import *
 from lib import pre
 from pandas import read_csv
@@ -9,7 +15,7 @@ import librosa.display
 
 
 PgzLocation = '../pgz'
-WavLocation = '../wav'
+WavLocation = '../wav_seg'
 
 class Application(Frame):
 
