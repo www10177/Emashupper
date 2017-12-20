@@ -21,7 +21,8 @@ else:
         for f in files:
             if f.endswith('.wav'):
                 f = f[:-4] # to trim .wav off
-                f = filter(lambda x: not (x.isdigit() or x == '_'), f) # to trim _1, _2, _3... off(number of song seg)_
+                #f = filter(lambda x: not (x.isdigit() or x == '_'), f) # to trim _1, _2, _3... off(number of song seg)_
+                f = f[:f.rfind('_')]
                 song_list.append(f)
     song_list = list(Set(song_list)) # list of all song (no duplicate)
     song_dict = {s : [0,0] for s in song_list} # dict to count total frames and segs of songs
@@ -33,7 +34,8 @@ else:
             if not f.endswith('.wav'):
                 continue
             fTrim = f[:-4] # to trim .wav off
-            fTrim = filter(lambda x: not (x.isdigit() or x == '_'), fTrim) # to trim _1, _2, _3... off(number of song seg)_
+            #fTrim = filter(lambda x: not (x.isdigit() or x == '_'), fTrim) # to trim _1, _2, _3... off(number of song seg)_
+            fTrim = fTrim[:fTrim.rfind('_')]
             if not fTrim in song_dict:
                 encodingPrint(f + ' is not in song list')
                 continue
@@ -46,4 +48,5 @@ else:
     with open(os.path.join(sys.argv[2],'metadata.csv'),'w') as csv:
         csv.write('song name,avg frame,total frame,segmentation count\n') # write csv title
         for song, data in song_dict.iteritems():
+            print data
             csv.write(song+','+str(data[0]/data[1])+','+str(data[0])+','+str(data[1])+'\n')

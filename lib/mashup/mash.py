@@ -4,7 +4,7 @@
 import librosa
 from pydub import AudioSegment
 
-from ..pre import *
+#from ..pre import *
 
 class mash:
     """
@@ -41,8 +41,9 @@ class mash:
         self.candSig = pyrb.time_stretch(self.candSig, self.candSr, multiplier)
 
     def pitch_shift(self, n_step):
-        self.candSig = librosa.effects.pitch_shift(self.candSig, self.candSr, n_step)
-
+        #self.candSig = librosa.effects.pitch_shift(self.candSig, self.candSr, n_step)
+        self.candSig = pyrb.pitch_shift(self.candSig, self.candSr, n_step)
+        
     def fade_in(self,time=1000):
         length = int(self.candSr * time * 0.001)
         for i in xrange(length):
