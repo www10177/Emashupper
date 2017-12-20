@@ -16,6 +16,9 @@ import librosa.display
 
 PgzLocation = '../pgz'
 WavLocation = '../wav_seg'
+LoadMode = 1
+# 0 would load pgz seperately, which might be slower but use less memory
+# 1 would load all pgz at once, which might be faster but use more memory
 
 class Application(Frame):
 
@@ -81,9 +84,50 @@ class Application(Frame):
     def playSeed(self):
         if sys.platform == 'darwin':
             Popen(["afplay",os.path.join(WavLocation,self.seedName+'_1.wav')])
-
-    def mashupSong(self):
+    def mashupLoadAtOnce(self):
         self.mashup= [None]*self.seedSegCount
+        mashabilityList = [None]*self.seedSegCount
+        mashupedIndex=[] # saved already mashuped seg index to filter repeat
+        seg=[]
+
+        # load all segmentation
+        for candIndex,candName in enumerate(self.csv['song name']):
+            if candIndex == self.seedIndex:
+                continue
+            for candSegIndex in xrange(1,self.csv['segmentation count'][candIndex]+1):
+                candSegPath = os.path.join(PgzLocation,candName+'_'+str(candSegIndex)+'.pgz')
+                seg.append(pre.load(candSegPath))
+        print "loaded all seg"
+
+        #Mashupping
+        for seedSegNow in xrange(0,self.seedSegCount):
+        # iterate all segmentations in seed song
+            maxMashability = -1000
+            maxSeg =None
+            maxIndex = -1 
+            for segIndex ,cand in enumerate(seg):
+            # iterate all segmentation
+                mash = pre.Mashability(self.seed[seedSegNow], cand).mash()
+                if maxMashability < mash:
+                    maxMashability = mash
+                    maxSeg =cand 
+                    maxIndex = segIndex
+                if segIndex % 10  == 0:
+                    print 'compared : ',segIndex, ' of ' ,len(seg) 
+            print 'maxSeg = ',maxSeg.name
+            mashabilityList[seedSegNow] = maxMashability
+            print 'Mashed : #',seedSegNow+1 ,' of ', self.seedSegCount 
+            self.mashup[seedSegNow] =maxSeg 
+            del seg[maxIndex]
+        print 'selected : '
+        for index, candSeg in enumerate(self.mashup):
+            print candSeg.name, mashabilityList[index]
+        self.saveMashuped()
+
+    def mashupLoadSeperately(self):
+        self.mashup= [None]*self.seedSegCount
+        mashabilityList = [None]*self.seedSegCount
+        mashupedDic={}
         for seedSegNow in xrange(0,self.seedSegCount):
         # iterate all segmentations in seed song
             maxMashability = -1000
@@ -91,11 +135,14 @@ class Application(Frame):
             maxSeg =None
             for candIndex,candName in enumerate(self.csv['song name']):
             # iterate all songs in database
-                if candIndex == self.seedIndex:
+                if candIndex == self.seedIndex :
                     continue
                 for candSegIndex in xrange(1,self.csv['segmentation count'][candIndex]+1):
                 # iterate all segmentations in candidate song
                     candSegPath = os.path.join(PgzLocation,candName+'_'+str(candSegIndex)+'.pgz')
+                    if canSedPath[:-4] in mashupedDic:
+                        print canSedPath, ' is already mashuped '
+                        continue
                     candSeg = pre.load(candSegPath)
                     mash = pre.Mashability(self.seed[seedSegNow], candSeg).mash()
                     if maxMashability < mash:
@@ -104,11 +151,23 @@ class Application(Frame):
                 print 'compared :',candName
                 if maxSeg is not None:
                     print 'maxSeg = ',maxSeg.name
+                    mashabilityList[seedSegNow] = maxMashability
             print 'Mashed : #',seedSegNow+1 ,' of ', self.seedSegCount
             self.mashup[seedSegNow] =maxSeg 
+            mashupedDic.add({maxSeg.name:True})
         print 'selected : '
-        for i in self.mashup:
-            print i.name
+        for index, candSeg in enumerate(self.mashup):
+            print candSeg.name, mashabilityList[index]
+        self.saveMashuped()
+
+    def mashupSong(self):
+        if LoadMode == 0:
+            print 'Load canidate seperately'
+            self.mashupLoadSeperately()
+        elif LoadMode == 1:
+            print 'Load canidate at once'
+            self.mashupLoadAtOnce()
+
 
     def saveMashuped(self):
     # !!WARNING!! Only saved candidate song, need to add seed song together !!WARNING!!
