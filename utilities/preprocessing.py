@@ -23,8 +23,10 @@ else :
             if f.endswith('wav'):
                 # create preaudio instance and stretch to uniform frame size
                 instance  = lib.pre.PreAudio(os.path.join(path,f))
-                #fTrim = filter(lambda x: not (x.isdigit() or x == '_'), instance.name) # to trim _1, _2, _3... off(number of song seg)_
+                # to trim _1, _2, _3... off(number of song seg)_
                 fTrim = instance.name[:instance.name.rfind('_')]
+                if instance.name.find('(inst)') == -1:
+                    fTrim = fTrim + '(inst)'
                 avgframe = find(csv, fTrim)
                 instance.stretch_seg(avgframe)
                 instance.save(outPath)
