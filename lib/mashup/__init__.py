@@ -1,2 +1,2 @@
-from . import functions
-from . import mash
+from .functions import *
+from .mash import *

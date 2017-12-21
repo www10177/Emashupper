@@ -24,7 +24,8 @@ else :
             if f.endswith('wav'):
                 # create preaudio instance and stretch to uniform frame size
                 instance  = lib.pre.PreAudio(os.path.join(path,f))
-                fTrim = filter(lambda x: not (x.isdigit() or x == '_'), instance.name) # to trim _1, _2, _3... off(number of song seg)_
+                #fTrim = filter(lambda x: not (x.isdigit() or x == '_'), instance.name) # to trim _1, _2, _3... off(number of song seg)_
+                fTrim = instance.name[:instance.name.rfind('_')]
                 instance.save(outPath)
             print 'progress : ', i+1, ' of ', len(files)
             i +=1

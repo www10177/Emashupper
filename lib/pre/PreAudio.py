@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import cPickle
 import gzip
+import pyrubberband as pyrb
 
 
 class PreAudio:
@@ -74,12 +75,12 @@ class PreAudio:
         # # approach_para_mul = 1  # increase the speed of approach
 
         ori = self.signal
-        multiplier = float(self.chroma.shape[1]/frameCount)
+        multiplier = float(self.chroma.shape[1] / frameCount)
         count = 1
         # aprroaching if frame count is not same
         # but it should be useless right now QQ
         while self.chroma.shape[1] != frameCount:
-            self.signal = librosa.effects.time_stretch(ori, multiplier)
+            self.signal = pyrb.time_stretch(ori, self.sr, multiplier)
             self.chroma = librosa.feature.chroma_stft(self.signal)
             difference = self.chroma.shape[1]-frameCount
             if difference < 0:

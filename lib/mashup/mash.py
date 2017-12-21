@@ -4,7 +4,7 @@
 import librosa
 from pydub import AudioSegment
 
-#from ..pre import *
+from ..pre import *
 
 class mash:
     """
@@ -43,12 +43,13 @@ class mash:
     def pitch_shift(self, n_step):
         #self.candSig = librosa.effects.pitch_shift(self.candSig, self.candSr, n_step)
         self.candSig = pyrb.pitch_shift(self.candSig, self.candSr, n_step)
-        
+    
+    """
     def fade_in(self,time=1000):
         length = int(self.candSr * time * 0.001)
         for i in xrange(length):
             self.candSig[i] = self.candSig[i] * i / length
-            return self
+        return self
 
     def fade_out(self,time=1000):
         length = int(self.candSr * time * 0.001)
@@ -75,3 +76,4 @@ class mash:
             else:
                 self.resultSig[i] = self.seedSig[i]
 
+    """
