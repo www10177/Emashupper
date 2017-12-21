@@ -36,7 +36,6 @@ def segment(fileLocation, toLocation,songLocation, songToLocation):
             boundaries, labels = msaf.process(audio_file)
             print(boundaries)
             songBoundary[filename[:filename.rfind('(inst')]] = boundaries
-#            songBoundary[filename[:filename.rfind('.')]] = boundaries
             '''
                 pydub does things in milliseconds(ten_seconds = 10 * 1000)
                 first_10_seconds = song[:ten_seconds]
@@ -44,7 +43,7 @@ def segment(fileLocation, toLocation,songLocation, songToLocation):
             '''
             segments = list()
             boundaries *= 1000
-            buff = 50
+            buff = 2500
             for index in xrange(1,len(boundaries)):
                 if index == 1 or index == len(boundaries)-2 : continue
                 elif index == 2 or index == len(boundaries)-1 :
@@ -89,10 +88,7 @@ def segment(fileLocation, toLocation,songLocation, songToLocation):
 
             segments = list()
             boundaries = songBoundary[filename[:filename.rfind('.')]]
-#            boundaries = songBoundary[filename[:filename.rfind('(inst')]]
             print (boundaries)
-#            boundaries *= 1000
-            buff = 50
 
             for index in xrange(1,len(boundaries)):
                 if index == 1 or index == len(boundaries)-2 : continue

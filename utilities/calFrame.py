@@ -22,6 +22,8 @@ else:
             if f.endswith('.wav'):
                 f = f[:-4] # to trim .wav off
                 #f = filter(lambda x: not (x.isdigit() or x == '_'), f) # to trim _1, _2, _3... off(number of song seg)_
+                if f.find('normalized-') != -1:
+                    f = f[f.find('normalized-')+11:]
                 f = f[:f.rfind('_')]
                 song_list.append(f)
     song_list = list(Set(song_list)) # list of all song (no duplicate)
@@ -35,6 +37,8 @@ else:
                 continue
             fTrim = f[:-4] # to trim .wav off
             #fTrim = filter(lambda x: not (x.isdigit() or x == '_'), fTrim) # to trim _1, _2, _3... off(number of song seg)_
+            if fTrim.find('normalized-') != -1:
+                fTrim = fTrim[fTrim.find('normalized-')+11:]
             fTrim = fTrim[:fTrim.rfind('_')]
             if not fTrim in song_dict:
                 encodingPrint(f + ' is not in song list')

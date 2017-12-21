@@ -13,7 +13,7 @@ def find(dataframe, name):
 
 
 if len(sys.argv) != 3:
-    print( 'Usage: python preprocessing.py SONGFODLER PGZFOLDER')
+    print( 'Usage: python unstretch_preprocessing.py SONGFODLER PGZFOLDER')
 else :
     inPath= sys.argv[1]
     outPath = sys.argv[2]

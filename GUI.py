@@ -14,8 +14,8 @@ import pygame
 import matplotlib.pyplot as plt
 import librosa.display
 
-SongPgzLocation = '../pgzSong_unstretch'
-PgzLocation = '../pgz_unstretch'
+SongPgzLocation = '../pgzSong'
+PgzLocation = '../pgz'
 WavLocation = '../wav_seg/inst'
 
 LoadMode = 1
@@ -90,11 +90,10 @@ class Application(Frame):
 
     def mashupLoadAtOnce(self):
         self.mashup = [None]*self.seedSegCount
-        #self.songWithVocal = [None]*self.seedSegCount
         mashabilityList = [None]*self.seedSegCount
         mashupedIndex = [] # saved already mashuped seg index to filter repeat
+        threshold = 0.85
         seg = []
-        #songSeg = []
 
         # load all segmentation
         for candIndex,candName in enumerate(self.csv['song name']):
@@ -108,6 +107,11 @@ class Application(Frame):
         #Mashupping
         for seedSegNow in xrange(0,self.seedSegCount):
         # iterate all segmentations in seed song
+        
+            # Notice: The first section and the last section will not be mashupped.
+            if seedSegNow == 0 or seedSegNow == self.seedSegCount-1 :
+                continue
+            
             maxMashability = -1000
             maxSeg = None
             maxIndex = -1 
@@ -124,20 +128,26 @@ class Application(Frame):
             mashabilityList[seedSegNow] = maxMashability
             candWithVocalSegPath = os.path.join(SongPgzLocation,maxSeg.name[:maxSeg.name.rfind('(inst')]+maxSeg.name[maxSeg.name.rfind('_'):]+'.pgz')
             print 'Mashed File: '+ maxSeg.name[:maxSeg.name.rfind('(inst')]+maxSeg.name[maxSeg.name.rfind('_'):]+'.pgz'
-            self.mashup[seedSegNow] = pre.load(candWithVocalSegPath)
+            
+            if maxMashability >= threshold :
+                self.mashup[seedSegNow] = pre.load(candWithVocalSegPath)
+            else: print('Mashability < Threshold , Skip ...')
+
             print 'Mashed : #',seedSegNow+1 ,' of ', self.seedSegCount
             
             del seg[maxIndex]
             
         print 'selected : '
         for index, candSeg in enumerate(self.mashup):
-            print candSeg.name, mashabilityList[index]
+            if candSeg :
+                print candSeg.name, mashabilityList[index]
         self.saveMashuped()
 
     def mashupLoadSeperately(self):
         self.mashup= [None]*self.seedSegCount
         mashabilityList = [None]*self.seedSegCount
         mashupedDic={}
+        threshold = 0.85
         for seedSegNow in xrange(0,self.seedSegCount):
         # iterate all segmentations in seed song
             maxMashability = -1000
@@ -163,7 +173,11 @@ class Application(Frame):
                     print 'maxSeg = ',maxSeg.name
                     mashabilityList[seedSegNow] = maxMashability
             print 'Mashed : #',seedSegNow+1 ,' of ', self.seedSegCount
-            self.mashup[seedSegNow] = maxSeg
+            
+            if maxMashability >= threshold :
+                self.mashup[seedSegNow] = maxSeg
+            else: print('Mashability < Threshold , Skip...')
+            
             mashupedDic.add({maxSeg.name:True})
         print 'selected : '
         for index, candSeg in enumerate(self.mashup):
@@ -178,17 +192,20 @@ class Application(Frame):
             print 'Load canidate at once'
             self.mashupLoadAtOnce()
 
-
     def saveMashuped(self):
         seg = [None] * self.seedSegCount
         for i in xrange(self.seedSegCount):
-            seg[i] = mashup.overlay(self.mashup[i].signal, self.mashup[i].sr, self.seed[i].signal, self.seed[i].sr)
+            if self.mashup[i] :
+                seg[i] = mashup.overlay(self.mashup[i].signal, self.mashup[i].sr, self.seed[i].signal, self.seed[i].sr)
+            else :
+                seg[i] = self.seed[i].signal
+            
             if i == 0 :
                 signal = seg[i]
             else:
                 signal = mashup.bridging(signal, self.seed[0].sr,seg[i], self.seed[0].sr)
         
-        outputFile = './mashupped.wav'
+        outputFile = './'+self.seedName+'_mashupped.wav'
         librosa.output.write_wav(outputFile,signal,self.seed[0].sr)
         mashup.volume_adjust(outputFile)
         self.mashuppedSig = signal
@@ -197,7 +214,7 @@ class Application(Frame):
     def playMashuped(self):
         self.saveMashuped()
         if sys.platform == 'darwin':
-            Popen(["afplay",'./normalized-mashupped.wav'])
+            Popen(["afplay",'./normalized-'+self.seedName+'_mashupped.wav'])
 
     def showMashuped(self):
         if self.mashuppedSig :

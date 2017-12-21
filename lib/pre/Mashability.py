@@ -82,7 +82,7 @@ class Mashability:
         result = sumToUnity(result)
         return 1-np.mean(result)
 
-    def mash(self,chroma =0.7, rhythm=0.2, spectral =0.1):
+    def mash(self,chroma = 0.55, rhythm=0.35, spectral =0.1):
         c=self.chroma()
         r=self.rhythm()
         s=self.spectral()

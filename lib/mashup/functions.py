@@ -19,12 +19,12 @@ def volume_adjust(input_file):
     cmd = FFMPEG_CMD + ' -v -f ' + input_file
     p = subprocess.Popen(shlex.split(cmd))
     
-def fade_in(sig,sr,time=1000):
+def fade_in(sig,sr,time=2500):
     length = int(sr * time * 0.001)
     for i in xrange(length):
         sig[i] = sig[i] * i / length
     
-def fade_out(sig,sr,time=1000):
+def fade_out(sig,sr,time=2500):
     length = int(sr * time * 0.001)
     sigLength = len(sig)
     for i in xrange(length):
@@ -54,14 +54,14 @@ def overlay(candSig,candSr,seedSig,seedSr,seed_start_time=0,cand_start_time=0,ca
     
     for i in xrange(len(seedSig)):
         if i >= seed_start_index and cand_start_index+j < cand_end_index :
-            resultSig[i] = seedSig[i]*0.8 + candSig[cand_start_index+j]*0.5
+            resultSig[i] = seedSig[i]*0.5 + candSig[cand_start_index+j]*0.3
             j+=1
         else:
             resultSig[i] = seedSig[i]
 
     return resultSig
 
-def bridging(preOrderSig, preOrderSr,postOrderSig, postOrderSr, overlapTime = 50):
+def bridging(preOrderSig, preOrderSr,postOrderSig, postOrderSr, overlapTime = 2500):
     preLength = len(preOrderSig)
     postLength = len(postOrderSig)
     fade_out(preOrderSig, preOrderSr, overlapTime)
