@@ -25,8 +25,8 @@ else :
                 instance  = lib.pre.PreAudio(os.path.join(path,f))
                 # to trim _1, _2, _3... off(number of song seg)_
                 fTrim = instance.name[:instance.name.rfind('_')]
-                if instance.name.find('(inst)') == -1:
-                    fTrim = fTrim + '(inst)'
+#                if instance.name.find('(inst)') == -1:
+#                    fTrim = fTrim + '(inst)'
                 avgframe = find(csv, fTrim)
                 instance.stretch_seg(avgframe)
                 instance.save(outPath)
