@@ -74,7 +74,7 @@ class PreAudio:
         # # approach_para_mul = 1  # increase the speed of approach
 
         ori = self.signal
-        multiplier = self.chroma.shape[1]/frameCount
+        multiplier = float(self.chroma.shape[1]/frameCount)
         count = 1
         # aprroaching if frame count is not same
         # but it should be useless right now QQ
