@@ -13,7 +13,6 @@ import numpy as np
 import pygame
 import matplotlib.pyplot as plt
 import librosa.display
-#import ffmpeg_normalize
 
 from PyQt4.QtGui import *
 
@@ -110,14 +109,14 @@ class Application(Frame):
         #Mashupping
         for seedSegNow in xrange(0,self.seedSegCount):
         # iterate all segmentations in seed song
-
+        
             # Notice: The first section and the last section will not be mashupped.
             if seedSegNow == 0 or seedSegNow == self.seedSegCount-1 :
                 continue
-
+            
             maxMashability = -1000
             maxSeg = None
-            maxIndex = -1
+            maxIndex = -1 
             for segIndex ,cand in enumerate(seg):
             # iterate all segmentation
                 mash = pre.Mashability(self.seed[seedSegNow], cand).mash()
@@ -126,108 +125,66 @@ class Application(Frame):
                     maxSeg = cand
                     maxIndex = segIndex
                 if segIndex % 10  == 0:
-                    print 'compared : ',segIndex, ' of ' ,len(seg)
+                    print 'compared : ',segIndex, ' of ' ,len(seg) 
             print 'maxSeg = ',maxSeg.name
             mashabilityList[seedSegNow] = maxMashability
             candWithVocalSegPath = os.path.join(SongPgzLocation,maxSeg.name[:maxSeg.name.rfind('(inst')]+maxSeg.name[maxSeg.name.rfind('_'):]+'.pgz')
             print 'Mashed File: '+ maxSeg.name[:maxSeg.name.rfind('(inst')]+maxSeg.name[maxSeg.name.rfind('_'):]+'.pgz'
-
+            
             if maxMashability >= threshold :
                 self.mashup[seedSegNow] = pre.load(candWithVocalSegPath)
             else: print('Mashability < Threshold , Skip ...')
 
             print 'Mashed : #',seedSegNow+1 ,' of ', self.seedSegCount
-
+            
             del seg[maxIndex]
-
+            
         print 'selected : '
         for index, candSeg in enumerate(self.mashup):
             if candSeg :
                 print candSeg.name,' : ', mashabilityList[index]
-
-        seg = [None] * self.seedSegCount
-        candStartTime = 0
-        seedStartTime = 0
-        candEndTime = -1
-        for i in xrange(self.seedSegCount):
-            # overlay cand and seed
-            if self.mashup[i] :
-                seg[i] = mashup.overlay(self.mashup[i].signal, self.mashup[i].sr, self.seed[i].signal, self.seed[i].sr,seedStartTime,candStartTime,candEndTime)
-            
-            ############ TO DO: matching the beats
-            
-            else :
-                seg[i] = self.seed[i].signal
-
-            # bridging
-            if i == 0 :
-                signal = seg[i]
-            else:
-                signal = mashup.bridging(signal, self.seed[0].sr,seg[i], self.seed[0].sr,5000)
-        self.mashuppedSig = signal
-
         self.saveMashuped()
 
-#    def mashupLoadSeperately(self):
-#        self.mashup= [None]*self.seedSegCount
-#        mashabilityList = [None]*self.seedSegCount
-#        mashupedDic={}
-#        threshold = 0.82
-#        for seedSegNow in xrange(0,self.seedSegCount):
-#        # iterate all segmentations in seed song
-#            maxMashability = -1000
-#            candSeg = None
-#            maxSeg = None
-#            for candIndex,candName in enumerate(self.csv['song name']):
-#            # iterate all songs in database
-#                if candIndex == self.seedIndex :
-#                    continue
-#                for candSegIndex in xrange(1,self.csv['segmentation count'][candIndex]+1):
-#                # iterate all segmentations in candidate song
-#                    candSegPath = os.path.join(PgzLocation,candName+'_'+str(candSegIndex)+'.pgz')
-#                    if canSedPath[:-4] in mashupedDic:
-#                        print canSedPath, ' is already mashupped '
-#                        continue
-#                    candSeg = pre.load(candSegPath)
-#                    mash = pre.Mashability(self.seed[seedSegNow], candSeg).mash()
-#                    if maxMashability < mash:
-#                        maxMashability = mash
-#                        maxSeg = candSeg
-#                print 'compared :',candName
-#                if maxSeg is not None:
-#                    print 'maxSeg = ',maxSeg.name
-#                    mashabilityList[seedSegNow] = maxMashability
-#            print 'Mashed : #',seedSegNow+1 ,' of ', self.seedSegCount
-#
-#            if maxMashability >= threshold :
-#                self.mashup[seedSegNow] = maxSeg
-#            else: print('Mashability < Threshold , Skip...')
-#
-#            mashupedDic.add({maxSeg.name:True})
-#        print 'selected : '
-#        for index, candSeg in enumerate(self.mashup):
-#            print candSeg.name,' : ', mashabilityList[index]
-#
-#        seg = [None] * self.seedSegCount
-#        candStartTime = 0
-#        seedStartTime = 0
-#        candEndTime = -1
-#        for i in xrange(self.seedSegCount):
-#            # overlay cand and seed
-#            if self.mashup[i] :
-#                seg[i] = mashup.overlay(self.mashup[i].signal, self.mashup[i].sr, self.seed[i].signal, self.seed[i].sr,seedStartTime,candStartTime,candEndTime)
-#            ############ TO DO: matching the beats
-#            else :
-#                seg[i] = self.seed[i].signal
-#
-#            # bridging
-#            if i == 0 :
-#                signal = seg[i]
-#            else:
-#                signal = mashup.bridging(signal, self.seed[0].sr,seg[i], self.seed[0].sr,5000)
-#        self.mashuppedSig = signal
-#
-#        self.saveMashuped()
+    def mashupLoadSeperately(self):
+        self.mashup= [None]*self.seedSegCount
+        mashabilityList = [None]*self.seedSegCount
+        mashupedDic={}
+        threshold = 0.82
+        for seedSegNow in xrange(0,self.seedSegCount):
+        # iterate all segmentations in seed song
+            maxMashability = -1000
+            candSeg = None
+            maxSeg = None
+            for candIndex,candName in enumerate(self.csv['song name']):
+            # iterate all songs in database
+                if candIndex == self.seedIndex :
+                    continue
+                for candSegIndex in xrange(1,self.csv['segmentation count'][candIndex]+1):
+                # iterate all segmentations in candidate song
+                    candSegPath = os.path.join(PgzLocation,candName+'_'+str(candSegIndex)+'.pgz')
+                    if canSedPath[:-4] in mashupedDic:
+                        print canSedPath, ' is already mashupped '
+                        continue
+                    candSeg = pre.load(candSegPath)
+                    mash = pre.Mashability(self.seed[seedSegNow], candSeg).mash()
+                    if maxMashability < mash:
+                        maxMashability = mash
+                        maxSeg = candSeg
+                print 'compared :',candName
+                if maxSeg is not None:
+                    print 'maxSeg = ',maxSeg.name
+                    mashabilityList[seedSegNow] = maxMashability
+            print 'Mashed : #',seedSegNow+1 ,' of ', self.seedSegCount
+            
+            if maxMashability >= threshold :
+                self.mashup[seedSegNow] = maxSeg
+            else: print('Mashability < Threshold , Skip...')
+            
+            mashupedDic.add({maxSeg.name:True})
+        print 'selected : '
+        for index, candSeg in enumerate(self.mashup):
+            print candSeg.name,' : ', mashabilityList[index]
+        self.saveMashuped()
 
     def mashupSong(self):
         if LoadMode == 0:
@@ -238,9 +195,23 @@ class Application(Frame):
             self.mashupLoadAtOnce()
 
     def saveMashuped(self):
+        seg = [None] * self.seedSegCount
+        for i in xrange(self.seedSegCount):
+            if self.mashup[i] :
+                seg[i] = mashup.overlay(self.mashup[i].signal, self.mashup[i].sr, self.seed[i].signal, self.seed[i].sr)
+            ############ TO DO: matching the beats
+            else :
+                seg[i] = self.seed[i].signal
+            
+            if i == 0 :
+                signal = seg[i]
+            else:
+                signal = mashup.bridging(signal, self.seed[0].sr,seg[i], self.seed[0].sr)
+        
         outputFile = './'+"".join(self.seedName.strip().split(' '))+'_mashupped.wav'
-        librosa.output.write_wav(outputFile,self.mashuppedSig,self.seed[0].sr)
+        librosa.output.write_wav(outputFile,signal,self.seed[0].sr)
         mashup.volume_adjust(outputFile)
+        self.mashuppedSig = signal
         print ('Done processing mashupped song.')
             
     def playMashuped(self):
@@ -268,14 +239,52 @@ class Application(Frame):
         Button(self,text='<- Save Mashuped Song',command=self.saveMashuped).grid(row=9,column=2,sticky='WE')
 
 
+
 if __name__ == '__main__':
     print 'pgz(inst) : ', PgzLocation
     print 'pgz(song) : ', SongPgzLocation
     print 'wav : ', WavLocation
     
-    '''
     app = QApplication(sys.argv)
     widget = QWidget()
+    widget.resize(1280, 720)
+    widget.move(80, 0)
+    widget.setWindowTitle("Emashupper")
+
+    loadFile = QPushButton("Load")
+    playSeed = QPushButton("Play Seed Song")
+    showSeed = QPushButton("Show Seed Wave")
+    
+    
+    
+    ok = QPushButton("&Load")
+    cancel = QPushButton("&Cancel")
+    #cancel.clicked.connect(button.close)
+    
+    layout = QHBoxLayout()
+    layout.addWidget(ok)
+    layout.addWidget(cancel)
+
+#    lineEdit = QLineEdit()
+#    go = QPushButton("&GO")
+#    h1 = QHBoxLayout()
+#    h1.addWidget(lineEdit)
+#    h1.addWidget(go)
+#
+#    ok = QPushButton("&OK")
+#    cancel = QPushButton("&Cancel")
+#
+#    h2 = QHBoxLayout()
+#    h2.addStretch(1)
+#    h2.addWidget(ok)
+#    h2.addWidget(cancel)
+#
+#    layout = QVBoxLayout()
+#    layout.addLayout(h1)
+#    layout.addLayout(h2)
+
+
+    widget.setLayout(layout)
     widget.show()
 
     app.exec_()
@@ -286,4 +295,4 @@ if __name__ == '__main__':
     #root.geometry('640x480')
     root.mainloop()
     #root.destroy()
-    
+    '''

@@ -32,6 +32,8 @@ def segment(fileLocation, toLocation,songLocation, songToLocation):
             song = AudioSegment.from_wav(audio_file)
             print ('Segment ' + audio_file)
 
+            #signal, sr = librosa.load(audio_file,sr=None)
+            
             # Segment the file using the default MSAF parameters
             boundaries, labels = msaf.process(audio_file)
             print(boundaries)
@@ -87,7 +89,10 @@ def segment(fileLocation, toLocation,songLocation, songToLocation):
             print ('Segment ' + audio_file)
 
             segments = list()
-            boundaries = songBoundary[filename[:filename.rfind('.')]]
+            if filename.rfind('(vocal') != -1:
+                boundaries = songBoundary[filename[:filename.rfind('(vocal')]]
+            else:
+                boundaries = songBoundary[filename[:filename.rfind('.')]]
             print (boundaries)
 
             for index in xrange(1,len(boundaries)):

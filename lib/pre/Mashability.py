@@ -5,6 +5,8 @@ import os
 import numpy as np
 from math import sqrt, pow
 from .PreAudio import *
+import dtw
+from numpy.linalg import norm
 
 class Mashability:
     '''
@@ -48,16 +50,31 @@ class Mashability:
             return 0
         return product / (sqrt(vec1D) * sqrt(vec2D))
 
+    def dtw(self,vec1,vec2):
+        dist, cost, acc, path = dtw(vec1, vec2, dist=lambda vec1, vec2: norm(vec1 - vec2, ord=1))
+        return dist
+
     def chroma(self):
         chroma = 0.0
+        
         seedC = self.seed.chroma.transpose()
         candC = self.cand.chroma.transpose()
+
         for i, frame in enumerate(seedC):
             if i >= candC.shape[0] :
                 break
             # print seedC[i],candC[i]
             chroma += self.cosine(seedC[i], candC[i])
+
         return chroma/seedC.shape[0]
+
+#        seedC = self.seed.chroma
+#        candC = self.cand.chroma
+#
+#        for i, frame in enumerate(seedC):
+#            dist = self.dtw(seedC[i], candC[i])
+
+
 
     def rhythm(self):
         return 1-(abs(self.seed.tempo[0]-self.cand.tempo[0]

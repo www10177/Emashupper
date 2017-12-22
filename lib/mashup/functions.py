@@ -31,7 +31,7 @@ def fade_out(sig,sr,time=2500):
         sig[sigLength-i-1] = sig[sigLength-i-1] * i / length
     
 def overlay(candSig,candSr,seedSig,seedSr,seed_start_time=0,cand_start_time=0,cand_end_time = -1):
-    ''' Noted that time unit is 'ms'(0.0001 sec.) '''
+    ''' Noted that time unit is 'ms'(0.001 sec.) '''
     if cand_start_time > cand_end_time:
         cand_start_time = 0.0
     elif cand_start_time == cand_end_time:
@@ -43,10 +43,9 @@ def overlay(candSig,candSr,seedSig,seedSr,seed_start_time=0,cand_start_time=0,ca
         cand_end_index = int(candSr * cand_end_time * 0.001)
         candSig = candSig[:cand_end_index]
     
-    #print candSig
     fade_in(candSig,candSr)
     fade_out(candSig,candSr)
-    #print candSig
+
     cand_start_index = int(candSr * cand_start_time * 0.001)
     seed_start_index = int(seedSr * seed_start_time * 0.001)
     j=0
@@ -54,7 +53,7 @@ def overlay(candSig,candSr,seedSig,seedSr,seed_start_time=0,cand_start_time=0,ca
     
     for i in xrange(len(seedSig)):
         if i >= seed_start_index and cand_start_index+j < cand_end_index :
-            resultSig[i] = seedSig[i]*0.5 + candSig[cand_start_index+j]*0.3
+            resultSig[i] = seedSig[i]*0.5 + candSig[cand_start_index+j]*0.5
             j+=1
         else:
             resultSig[i] = seedSig[i]
@@ -62,12 +61,12 @@ def overlay(candSig,candSr,seedSig,seedSr,seed_start_time=0,cand_start_time=0,ca
     return resultSig
 
 def bridging(preOrderSig, preOrderSr,postOrderSig, postOrderSr, overlapTime = 2500):
-    preLength = len(preOrderSig)
-    postLength = len(postOrderSig)
     fade_out(preOrderSig, preOrderSr, overlapTime)
     fade_in(postOrderSig, postOrderSr, overlapTime)
     
-    overlapLength = int(preOrderSr * overlapTime * 0.001)
+    preLength = len(preOrderSig)
+    postLength = len(postOrderSig)
+    overlapLength = int(postOrderSr * overlapTime * 0.001)
     songLength = preLength - overlapLength + postLength
     resultSig = preOrderSig
     

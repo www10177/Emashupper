@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "timestamp": "2017/12/22 01:45:07", 
+    "timestamp": "2017/12/23 01:11:38", 
     "versions": {
       "numpy": "1.13.3", 
       "msaf": "0.1.51", 
@@ -8,7 +8,7 @@
     }
   }, 
   "globals": {
-    "audio_file": "../../normalized_wav/inst/normalized-Sia - Cheap Thrills(inst).wav", 
+    "audio_file": "../../wav/inst_/normalized-Sia - Cheap Thrills(inst).wav", 
     "dur": 226.0926984126984, 
     "sample_rate": 22050, 
     "hop_length": 1024
