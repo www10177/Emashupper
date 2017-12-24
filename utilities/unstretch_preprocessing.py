@@ -17,7 +17,7 @@ if len(sys.argv) != 3:
 else :
     inPath= sys.argv[1]
     outPath = sys.argv[2]
-    csv = read_csv(os.path.join(outPath,'metadata.csv'))
+#    csv = read_csv(os.path.join(outPath,'metadata.csv'))
     i =0
     for path,dir,files in os.walk(inPath):
         for f in files:

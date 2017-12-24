@@ -33,7 +33,8 @@ class PreAudio:
         self.name = os.path.splitext(os.path.basename(filePath))[0]
         self.signal, self.sr = librosa.load(filePath,sr=None)
         self.chroma = librosa.feature.chroma_stft(self.signal)
-        self.tempo = librosa.beat.tempo(self.signal)
+        self.tempo = librosa.beat.beat_track(self.signal, sr=self.sr)[0]
+#        self.tempo = librosa.beat.tempo(self.signal)
         self.spec = librosa.feature.melspectrogram(self.signal, sr=self.sr)
 
     def visualize(self, mode='wave'):

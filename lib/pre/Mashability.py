@@ -5,7 +5,7 @@ import os
 import numpy as np
 from math import sqrt, pow
 from .PreAudio import *
-import dtw
+from dtw import dtw
 from numpy.linalg import norm
 
 class Mashability:
@@ -50,8 +50,10 @@ class Mashability:
             return 0
         return product / (sqrt(vec1D) * sqrt(vec2D))
 
-    def dtw(self,vec1,vec2):
-        dist, cost, acc, path = dtw(vec1, vec2, dist=lambda vec1, vec2: norm(vec1 - vec2, ord=1))
+    def dtwCount(self,vec1,vec2):
+#        dist, cost, acc, path = dtw(vec1, vec2, dist=lambda vec1, vec2: norm(vec1 - vec2, ord=1))
+
+        dist, cost, acc, path = dtw(vec1, vec2, dist=norm)
         return dist
 
     def chroma(self):
@@ -68,12 +70,13 @@ class Mashability:
 
         return chroma/seedC.shape[0]
 
+# error...
 #        seedC = self.seed.chroma
 #        candC = self.cand.chroma
-#
+#        dist = 0
 #        for i, frame in enumerate(seedC):
-#            dist = self.dtw(seedC[i], candC[i])
-
+#            dist += dtw(seedC[i], candC[i], dist=norm)[0]
+#        return 1 - dist
 
 
     def rhythm(self):
@@ -99,7 +102,7 @@ class Mashability:
         result = sumToUnity(result)
         return 1-np.mean(result)
 
-    def mash(self,chroma = 0.55, rhythm=0.35, spectral =0.1):
+    def mash(self,chroma = 0.5, rhythm=0.4, spectral =0.1):
         c=self.chroma()
         r=self.rhythm()
         s=self.spectral()
