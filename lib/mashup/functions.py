@@ -74,8 +74,8 @@ def beat_matching(candSig, candSr, seedSig, seedSr, vocalSig, vocalSr):
         stretchedSig = time_stretching(vocalSig,seedSr,float(diff))
         #stretchedSig *= 0.5
 
-        out = '../result_stretched.wav'
-        librosa.output.write_wav(out,stretchedSig,seedSr)
+#        out = '../result_stretched.wav'
+#        librosa.output.write_wav(out,stretchedSig,seedSr)
 
         shiftedSig = np.zeros(len(seedSig))
 
@@ -96,14 +96,14 @@ def beat_matching(candSig, candSr, seedSig, seedSr, vocalSig, vocalSr):
         else:
             shiftedSig = stretchedSig
 
-        out = '../result_vocal.wav'
-        librosa.output.write_wav(out,shiftedSig,seedSr)
+#        out = '../result_vocal.wav'
+#        librosa.output.write_wav(out,shiftedSig,seedSr)
 
 #        fade_in(shiftedSig)
 #        fade_out(shiftedSig)
 
-        out = '../shifted.wav'
-        librosa.output.write_wav(out,shiftedSig,seedSr)
+#        out = '../shifted.wav'
+#        librosa.output.write_wav(out,shiftedSig,seedSr)
 
 
 #        for i in xrange(len(seedSig)):
