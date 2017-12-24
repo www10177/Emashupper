@@ -213,14 +213,13 @@ class Application(Frame):
             print candSeg.name,' : ', mashabilityList[index]
 
         seg = [None] * self.seedSegCount
-        candStartTime = 0
-        seedStartTime = 0
-        candEndTime = -1
+
         for i in xrange(self.seedSegCount):
             # overlay cand and seed
             if self.mashup[i] :
-                seg[i] = mashup.overlay(self.mashup[i].signal, self.mashup[i].sr, self.seed[i].signal, self.seed[i].sr,seedStartTime,candStartTime,candEndTime)
-            ############ TO DO: matching the beats
+                instSegPath = pathJoin(WavLocation,maxSeg.name + '.wav')
+                instSig, instSr = librosa.load(instSegPath,sr = None)
+                seg[i] = mashup.overlay(instSig, instSr, self.seed[i].signal,self.seed[i].sr, self.mashup[i].signal, self.mashup[i].sr)
             else :
                 seg[i] = self.seed[i].signal
 
@@ -229,8 +228,8 @@ class Application(Frame):
                 signal = seg[i]
             else:
                 signal = mashup.bridging(signal, self.seed[0].sr,seg[i], self.seed[0].sr,5000)
+            
         self.mashuppedSig = signal
-
         self.saveMashuped()
 
     def mashupSong(self):
@@ -253,7 +252,7 @@ class Application(Frame):
             Popen(["afplay",'./normalized-'+"".join(self.seedName.strip().split(' '))+'_mashupped.wav'])
 
     def showMashuped(self):
-        if self.mashuppedSig :
+        if len(self.mashuppedSig) > 1:
             librosa.display.waveplot(self.mashuppedSig, sr=self.seed[0].sr)
             plt.title('Mashupped Wave')
             plt.show()
