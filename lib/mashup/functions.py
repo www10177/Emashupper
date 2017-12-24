@@ -60,7 +60,6 @@ def beat_matching(candSig, candSr, seedSig, seedSr, vocalSig, vocalSr):
     calculateFlag = 1
     degree = int(round(float(seedTempo) / float(candTempo)))
     # print degree
-    
 
     if calculateFlag == 1:
         # M1: match tempo
@@ -75,7 +74,7 @@ def beat_matching(candSig, candSr, seedSig, seedSr, vocalSig, vocalSr):
         stretchedSig = time_stretching(vocalSig,seedSr,float(diff))
         #stretchedSig *= 0.5
 
-        out = '../../result_stretched.wav'
+        out = '../result_stretched.wav'
         librosa.output.write_wav(out,stretchedSig,seedSr)
 
         shiftedSig = np.zeros(len(seedSig))
@@ -97,13 +96,13 @@ def beat_matching(candSig, candSr, seedSig, seedSr, vocalSig, vocalSr):
         else:
             shiftedSig = stretchedSig
 
-        out = './' + outName + '_vocal.wav'
+        out = '../result_vocal.wav'
         librosa.output.write_wav(out,shiftedSig,seedSr)
 
 #        fade_in(shiftedSig)
 #        fade_out(shiftedSig)
 
-        out = '../../shifted.wav'
+        out = '../shifted.wav'
         librosa.output.write_wav(out,shiftedSig,seedSr)
 
 
