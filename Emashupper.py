@@ -147,7 +147,7 @@ class Window(QtGui.QWidget):
         # event helper for listbox slection
         # Note here that Tkinter passes an event object to onselect()
         if not self.songListWidget.selectedItems():
-            print ("Please select a seed song.")
+            print ("Please select a category first.")
         else:
             index = self.songListWidget.currentRow()
             value = self.songListWidget.currentItem().text()
@@ -158,7 +158,7 @@ class Window(QtGui.QWidget):
     def actionElements(self):
         # initialze buttons,labels...
         
-        load_file = QtGui.QPushButton("-> Load Segments")
+        load_file = QtGui.QPushButton("-> Load Song Segments")
         load_file.setFont(QtGui.QFont("Courier",15))
         load_file.setStyleSheet('''
             background-image: url('./material/button.png');
@@ -272,7 +272,7 @@ class Window(QtGui.QWidget):
 
     def playSeed(self):
         if sys.platform == 'darwin':
-            Popen(["afplay",pathJoin(WavLocation,'normalized-'+self.seedName+'(inst)'+ '_1.wav')])
+            Popen(["afplay",pathJoin(WavLocation,self.seedName+'(inst)'+ '_1.wav')])
 
 
     def mashupLoadAtOnce(self):
@@ -294,11 +294,6 @@ class Window(QtGui.QWidget):
         #Mashupping
         for seedSegNow in xrange(0,self.seedSegCount):
             # iterate all segmentations in seed song
-
-#            # Notice: The first section and the last section will not be mashupped.
-#            if seedSegNow == 0 or seedSegNow == self.seedSegCount-1 :
-#                continue
-
 
             maxMashability = -1000
             maxSeg = None
