@@ -27,6 +27,7 @@ PgzLocation = '../pgz/'
 WavLocation = '/inst_seg/'
 cateLocation = '../category/'
 
+from random import randint
 from PyQt4 import QtGui
 
 LoadMode = 1
@@ -113,11 +114,7 @@ class Window(QtGui.QWidget):
         self.cateListWidget = QtGui.QListWidget(self)
         self.catelist = []
         for path,dir,files in os.walk(cateLocation):
-            if 'inst' in dir: dir.remove('inst')
-            if 'vocal' in dir: dir.remove('vocal')
-            if 'inst_seg' in dir: dir.remove('inst_seg')
-            if 'vocal_seg' in dir: dir.remove('vocal_seg')
-            for cate in dir:
+            for cate in [f[:f.rfind('.')] for f in files if f.endswith('.meta')]:
                 self.cateListWidget.addItem(cate)
                 self.catelist.append(cate)
         #        for cate in self.csv['category']:
@@ -267,13 +264,11 @@ class Window(QtGui.QWidget):
     def seedGenerate(self):
         print('seedG')
         #open the songlist(csv) of the chosen category, and show the ramdomly choice
-        self.seedName = 'Test'
-        """
-                self.seedIndex = index
-                self.seedName = value
-                print 'selected %d: "%s"' % (index, value)
-        """
-
+        print self.cateName
+        songs = [s.rstrip('\n') for s in open(cateLocation+self.cateName+'.meta','r')]
+        print self.seedName
+        self.seedName = songs[randint(1,len(songs)-1)]
+        print self.seedName
     def seedShow(self):
         signal = self.seed[0].signal
         for i in self.seed[1:]:
