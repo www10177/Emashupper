@@ -18,14 +18,9 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 
-#SongPgzLocation = '../pgz/vocal/'
-#PgzLocation = '../pgz/inst/'
-#WavLocation = '../wav_seg/inst/'
-
 #Please Modify This Parameter Only#
 DataLocationA='../db'
 ##########
-
 
 SongPgzLocation = os.path.join(DataLocationA,'pgz/')
 PgzLocation= os.path.join(DataLocationA,'pgz/')
@@ -34,6 +29,7 @@ cateLocation= os.path.join(DataLocationA,'category/')
 
 from random import randint
 from PyQt4 import QtGui
+from PyQt4 import QtCore
 
 LoadMode = 1
 # 0 would load pgz seperately, which might be slower but use less memory
@@ -61,17 +57,9 @@ class Figure_Canvas(FigureCanvas):
 
         FigureCanvas.__init__(self, fig)
         self.setParent(parent)
-        
+    
         self.axes = fig.add_subplot(111)
-        # 调用figure下面的add_subplot方法，类似于matplotlib.pyplot下面的subplot方法
-        #            # create an axis
-        #            ax = self.figure.add_subplot(111)
-        #            # discards the old graph
-        #            ax.clear()
-        #            # plot data
-        #            ax.plot(signal, '*-')
-        #            # refresh canvas
-        #            self.canvas.draw()
+    
     def draw(self,x,y,title):
         self.axes.clear()
         self.axes.set_title(title)
@@ -98,7 +86,7 @@ class Window(QtGui.QWidget):
 
     def initUI(self):
         #initialize UI
-        self.setGeometry(150, 30, 960, 540)
+        self.setGeometry(150, 30, 830, 540)
         self.setWindowTitle('Emashupper')
         
         palette1 = QtGui.QPalette()
@@ -118,14 +106,22 @@ class Window(QtGui.QWidget):
         # show all category list
         self.cateListWidget = QtGui.QListWidget(self)
         self.catelist = []
+#        for path,dir,files in os.walk(WavLocation):
+#            if 'inst' in dir: dir.remove('inst')
+#            if 'vocal' in dir: dir.remove('vocal')
+#            for cate in dir:
+#                self.cateListWidget.addItem(cate)
+#                self.catelist.append(cate)
+####here
         for path,dir,files in os.walk(cateLocation):
             for cate in [f[:f.rfind('.')] for f in files if f.endswith('.meta')]:
                 self.cateListWidget.addItem(cate)
                 self.catelist.append(cate)
-        #        for cate in self.csv['category']:
-        #            self.cateListWidget.addItem(cate)
-        #            self.catelist.append(cate)
-        
+
+#            for cate in self.csv['category']:
+#                self.cateListWidget.addItem(cate)
+#                self.catelist.append(cate)
+
         self.cateListWidget.setAutoFillBackground(True)
         self.cateListWidget.setStyleSheet('''
             color: white;
@@ -134,8 +130,8 @@ class Window(QtGui.QWidget):
         self.cateListWidget.setFont(QtGui.QFont("Courier",15))
         self.cateListWidget.itemSelectionChanged.connect(self.onselect)
         #set header
-        self.cateListWidget.move(40, 90)
-        self.cateListWidget.resize(150, 230)
+        self.cateListWidget.move(30, 90)
+        self.cateListWidget.resize(225, 245)
         self.cateListWidget.show()
 
     def onselect(self):
@@ -157,8 +153,7 @@ class Window(QtGui.QWidget):
         """
     def actionElements(self):
         # initialze buttons,labels...
-        
-        seed_generate = QtGui.QPushButton("-> Random Seed ->")
+        seed_generate = QtGui.QPushButton("Generate Random Seed -> ")
         seed_generate.setFont(QtGui.QFont("Courier",15))
         seed_generate.setStyleSheet('''
             background-image: url('./material/button.png');
@@ -166,9 +161,22 @@ class Window(QtGui.QWidget):
             ''')
         seed_generate.clicked.connect(self.seedGenerate)
         
-        seedNameShow = QtGui.QLabel(self.seedName)
-        
-        load_file = QtGui.QPushButton("Load Candidate Segments")
+#        self.seedName = "i dont know/i dont know/i dont know"
+        seedLabel = self.seedName[:18]
+        last = self.seedName[18:]
+        while len(last) >= 24:
+            seedLabel = seedLabel + '\n' + last[:24]
+            last = last[24:]
+        seedLabel = seedLabel + '\n' + last
+
+        seedNameShow = QtGui.QLabel("\nSeed: "+seedLabel)
+        seedNameShow.setFont(QtGui.QFont("Courier",15))
+#        seedNameShow.setStyleSheet('''
+#            background-image: url('./material/button.png');
+#            background-color: rgba(255, 255, 255, 0);
+#            ''')
+
+        load_file = QtGui.QPushButton("Load Candidate Segments ")
         load_file.setFont(QtGui.QFont("Courier",15))
         load_file.setStyleSheet('''
             background-image: url('./material/button.png');
@@ -176,7 +184,6 @@ class Window(QtGui.QWidget):
             ''')
         load_file.clicked.connect(self.load)
         
-        #seedl = QtGui.QLabel("--- Seed ---")
         play_seed = QtGui.QPushButton("Play Seed Song")
         play_seed.setFont(QtGui.QFont("Courier",15))
         play_seed.setStyleSheet('''
@@ -192,7 +199,6 @@ class Window(QtGui.QWidget):
             ''')
         show_seed.clicked.connect(self.seedShow)
         
-        #mashl = QtGui.QLabel("--- Mashup ---")
         do_mash = QtGui.QPushButton("Mashup")
         do_mash.setFont(QtGui.QFont("Courier",15))
         do_mash.setStyleSheet('''
@@ -228,35 +234,56 @@ class Window(QtGui.QWidget):
         
         layout0 = QtGui.QVBoxLayout()
         layout0.addWidget(seed_generate)
-        #layout0.setAlignment(Qt.AlignTop)
+#        layout0.addWidget(seedNameShow)
+        layout0.setAlignment(QtCore.Qt.AlignTop)
+
+#        layout1 = QtGui.QVBoxLayout()
+#        layout1.addWidget(seedNameShow)
+#        layout1.setAlignment(QtCore.Qt.AlignTop)
+
+        emp = QtGui.QLabel("")
+        layout2 = QtGui.QVBoxLayout()
+#        layout2.setAlignment(QtCore.Qt.AlignCenter)
+        layout2.setAlignment(QtCore.Qt.AlignTop)
+#        layout2.addLayout(layout1)
+        layout2.addWidget(seedNameShow)
+        layout2.addWidget(emp)
+        layout2.addWidget(emp)
+#        layout2.addWidget(emp)
+        layout2.addWidget(emp)
+        layout2.addWidget(load_file)
+        layout2.addWidget(emp)
+        layout2.addWidget(play_seed)
+        layout2.addWidget(emp)
+        layout2.addWidget(show_seed)
+
+        layout3 = QtGui.QVBoxLayout()
+        layout3.setAlignment(QtCore.Qt.AlignCenter)
+        layout3.addWidget(do_mash)
+        layout3.addWidget(emp)
+        layout3.addWidget(play_mash)
+        layout3.addWidget(emp)
+        layout3.addWidget(show_mash)
+        layout3.addWidget(emp)
+        layout3.addWidget(save_mash)
+        layout3.addWidget(emp)
+        layout3.addWidget(emp)
+        layout3.addWidget(emp)
         
-        layout1 = QtGui.QVBoxLayout()
-        layout1.addWidget(seedNameShow)
-        
-        #layout = QHBoxLayout()
-        layout = QtGui.QVBoxLayout()
-        layout.addWidget(load_file)
-#        layout.addWidget(seedl)
-        layout.addWidget(play_seed)
-        layout.addWidget(show_seed)
-#        layout.addWidget(mashl)
-        layout.addWidget(do_mash)
-        layout.addWidget(play_mash)
-        layout.addWidget(show_mash)
-        layout.addWidget(save_mash)
-        
-        layout2 = QtGui.QHBoxLayout()
+
+        layout = QtGui.QHBoxLayout()
 #        layout2.addWidget(self.toolbar)
 #        layout2.addWidget(self.canvas)
-        layout2.addStretch()
-        layout2.addLayout(layout0)
-        layout2.addStretch()
-        layout2.addLayout(layout1)
-        layout2.addStretch()
-        layout2.addLayout(layout)
-        self.setLayout(layout2)
+#        layout2.addStretch()
+        layout.addLayout(layout0)
+#        layout.addStretch()
+#        layout.addLayout(layout1)
+        layout.addStretch()
+        layout.addLayout(layout2)
+        layout.addStretch()
+        layout.addLayout(layout3)
+        self.setLayout(layout)
     
-# need to fix ~~~~~~~~~~~~~~~~~~~~~~~~
     def load(self):
         self.csv = read_csv(PgzLocation+self.cateName+'/metadata.csv')
         c = self.csv # To simpilfy 
@@ -273,22 +300,21 @@ class Window(QtGui.QWidget):
     def seedGenerate(self):
         #open the songlist(csv) of the chosen category, and show the ramdomly choice
         print self.cateName
+### here
         songs = [s.rstrip('\n') for s in open(cateLocation+self.cateName+'.meta','r')]
         self.seedName = songs[randint(1,len(songs)-1)]
+
+#        print self.csv['song name']
+#        songs = [s.rstrip('\n') for s in self.csv['song name'].itervalues()]
+#        print song
+#        self.seedName = songs[randint(1,len(songs)-1)]
+
         print self.seedName
+    
     def seedShow(self):
         signal = self.seed[0].signal
         for i in self.seed[1:]:
             signal = np.concatenate((signal,i.signal))
-
-#            # create an axis
-#            ax = self.figure.add_subplot(111)
-#            # discards the old graph
-#            ax.clear()
-#            # plot data
-#            ax.plot(signal, '*-')
-#            # refresh canvas
-#            self.canvas.draw()
 
         dr = Figure_Canvas()
         dr.draw([[i for i in xrange(len(signal))],self.seed[0].sr], signal,'Seed Song Waveplot')
@@ -483,7 +509,7 @@ class Window(QtGui.QWidget):
 
 if __name__ == '__main__':
 
-    print ' Data : ',DataLocation 
+    print ' Data : ',DataLocationA
     print 'pgz(inst) : ', PgzLocation
     print 'pgz(vocal) : ', SongPgzLocation
     print 'category list : ', cateLocation
