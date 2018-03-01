@@ -22,10 +22,15 @@ from matplotlib.figure import Figure
 #PgzLocation = '../pgz/inst/'
 #WavLocation = '../wav_seg/inst/'
 
-SongPgzLocation = '../pgz/vocal/'
-PgzLocation = '../pgz/'
-WavLocation = '/inst_seg/'
-cateLocation = '../category/'
+#Please Modify This Parameter Only#
+DataLocationA='../db'
+##########
+
+
+SongPgzLocation = os.path.join(DataLocationA,'pgz/')
+PgzLocation= os.path.join(DataLocationA,'pgz/')
+WavLocation= os.path.join(DataLocationA,'song/')
+cateLocation= os.path.join(DataLocationA,'category/')
 
 from random import randint
 from PyQt4 import QtGui
@@ -142,7 +147,7 @@ class Window(QtGui.QWidget):
             index = self.cateListWidget.currentRow()
             value = self.cateListWidget.currentItem().text()
             self.cateIndex = index
-            self.cateName = value
+            self.cateName = str(value)
             print 'selected %d: "%s"' % (index, value)
         
         """
@@ -254,7 +259,11 @@ class Window(QtGui.QWidget):
 # need to fix ~~~~~~~~~~~~~~~~~~~~~~~~
     def load(self):
         self.csv = read_csv(PgzLocation+self.cateName+'/metadata.csv')
+        c = self.csv # To simpilfy 
+        self.seedIndex = c.index[c['song name'] == self.seedName].tolist()[0]
         self.seedSegCount= self.csv['segmentation count'][self.seedIndex]
+        print self.seedIndex
+        print self.seedName
         self.seed = [None] * self.seedSegCount
         for i in xrange(0,self.seedSegCount):
             name = pathJoin(PgzLocation+self.cateName+'/inst/',self.seedName+'(inst)'+'_'+str(i+1)+'.pgz')
@@ -262,11 +271,9 @@ class Window(QtGui.QWidget):
             print 'loaded ',self.seed[i].name
 
     def seedGenerate(self):
-        print('seedG')
         #open the songlist(csv) of the chosen category, and show the ramdomly choice
         print self.cateName
         songs = [s.rstrip('\n') for s in open(cateLocation+self.cateName+'.meta','r')]
-        print self.seedName
         self.seedName = songs[randint(1,len(songs)-1)]
         print self.seedName
     def seedShow(self):
@@ -312,7 +319,7 @@ class Window(QtGui.QWidget):
             if candIndex == self.seedIndex:
                 continue
             for candSegIndex in xrange(1,self.csv['segmentation count'][candIndex]+1):
-                candSegPath = pathJoin(PgzLocation+self.cateLocation+'/inst/',candName+'(inst)'+'_'+str(candSegIndex)+'.pgz')
+                candSegPath = pathJoin(PgzLocation+self.cateName+'/inst/',candName+'(inst)'+'_'+str(candSegIndex)+'.pgz')
                 seg.append(pre.load(candSegPath))
         print "loaded all seg"
 
@@ -325,9 +332,9 @@ class Window(QtGui.QWidget):
             maxIndex = -1
             for segIndex ,cand in enumerate(seg):
                 # iterate all segmentation
-                mash = pre.Mashability(self.seed[seedSegNow], cand).mash()
-                if maxMashability < mash:
-                    maxMashability = mash
+                masha = pre.Mashability(self.seed[seedSegNow], cand).mash()
+                if maxMashability < masha:
+                    maxMashability = masha
                     maxSeg = cand
                     maxIndex = segIndex
                 if segIndex % 10  == 0:
@@ -358,7 +365,7 @@ class Window(QtGui.QWidget):
         for i in xrange(self.seedSegCount):
             # overlay cand and seed
             if self.mashup[i] :
-                instSegPath = pathJoin(cateLocation+self.cateName+WavLocation,maxSeg.name + '.wav')
+                instSegPath = pathJoin(WavLocation+self.cateName+'/inst/',maxSeg.name + '.wav')
                 instSig, instSr = librosa.load(instSegPath,sr = None)
                 seg[i] = mashup.overlay(instSig, instSr, self.seed[i].signal,self.seed[i].sr, self.mashup[i].signal, self.mashup[i].sr)
 
@@ -475,6 +482,8 @@ class Window(QtGui.QWidget):
 ####################################################################
 
 if __name__ == '__main__':
+
+    print ' Data : ',DataLocation 
     print 'pgz(inst) : ', PgzLocation
     print 'pgz(vocal) : ', SongPgzLocation
     print 'category list : ', cateLocation

@@ -80,8 +80,9 @@ class Mashability:
 
 
     def rhythm(self):
-        return 1-(abs(self.seed.tempo[0]-self.cand.tempo[0]
-                      ) / self.seed.tempo[0])
+        if isinstance(self.seed.tempo,np.float64):
+            return 1-(abs(self.seed.tempo-self.cand.tempo) / self.seed.tempo)
+        return 1-(abs(self.seed.tempo[0]-self.cand.tempo[0]) / self.seed.tempo[0])
 
     def spectral(self):
         # might be buggy
