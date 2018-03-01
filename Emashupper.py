@@ -25,7 +25,6 @@ DataLocationA='../db'
 SongPgzLocation = os.path.join(DataLocationA,'pgz/')
 PgzLocation= os.path.join(DataLocationA,'pgz/')
 WavLocation= os.path.join(DataLocationA,'song/')
-cateLocation= os.path.join(DataLocationA,'category/')
 
 from random import randint
 from PyQt4 import QtGui
@@ -113,15 +112,10 @@ class Window(QtGui.QWidget):
 #                self.cateListWidget.addItem(cate)
 #                self.catelist.append(cate)
 ####here
-        for path,dir,files in os.walk(cateLocation):
-            for cate in [f[:f.rfind('.')] for f in files if f.endswith('.meta')]:
-                self.cateListWidget.addItem(cate)
-                self.catelist.append(cate)
-
-#            for cate in self.csv['category']:
-#                self.cateListWidget.addItem(cate)
-#                self.catelist.append(cate)
-
+        s=filter(lambda x: os.path.isdir(os.path.join(WavLocation, x)), os.listdir(WavLocation)) 
+        for cate in s:
+            self.cateListWidget.addItem(cate)
+            self.catelist.append(cate)
         self.cateListWidget.setAutoFillBackground(True)
         self.cateListWidget.setStyleSheet('''
             color: white;
@@ -162,15 +156,9 @@ class Window(QtGui.QWidget):
         seed_generate.clicked.connect(self.seedGenerate)
         
 #        self.seedName = "i dont know/i dont know/i dont know"
-        seedLabel = self.seedName[:18]
-        last = self.seedName[18:]
-        while len(last) >= 24:
-            seedLabel = seedLabel + '\n' + last[:24]
-            last = last[24:]
-        seedLabel = seedLabel + '\n' + last
 
-        seedNameShow = QtGui.QLabel("\nSeed: "+seedLabel)
-        seedNameShow.setFont(QtGui.QFont("Courier",15))
+        self.seedNameShow = QtGui.QLabel("\nSeed: ")
+        self.seedNameShow.setFont(QtGui.QFont("Courier",15))
 #        seedNameShow.setStyleSheet('''
 #            background-image: url('./material/button.png');
 #            background-color: rgba(255, 255, 255, 0);
@@ -246,7 +234,7 @@ class Window(QtGui.QWidget):
 #        layout2.setAlignment(QtCore.Qt.AlignCenter)
         layout2.setAlignment(QtCore.Qt.AlignTop)
 #        layout2.addLayout(layout1)
-        layout2.addWidget(seedNameShow)
+        layout2.addWidget(self.seedNameShow)
         layout2.addWidget(emp)
         layout2.addWidget(emp)
 #        layout2.addWidget(emp)
@@ -285,7 +273,6 @@ class Window(QtGui.QWidget):
         self.setLayout(layout)
     
     def load(self):
-        self.csv = read_csv(PgzLocation+self.cateName+'/metadata.csv')
         c = self.csv # To simpilfy 
         self.seedIndex = c.index[c['song name'] == self.seedName].tolist()[0]
         self.seedSegCount= self.csv['segmentation count'][self.seedIndex]
@@ -299,17 +286,18 @@ class Window(QtGui.QWidget):
 
     def seedGenerate(self):
         #open the songlist(csv) of the chosen category, and show the ramdomly choice
+        self.csv = read_csv(PgzLocation+self.cateName+'/metadata.csv')
         print self.cateName
-### here
-        songs = [s.rstrip('\n') for s in open(cateLocation+self.cateName+'.meta','r')]
+        songs = [s.rstrip('\n') for s in self.csv['song name']]
         self.seedName = songs[randint(1,len(songs)-1)]
 
-#        print self.csv['song name']
-#        songs = [s.rstrip('\n') for s in self.csv['song name'].itervalues()]
-#        print song
-#        self.seedName = songs[randint(1,len(songs)-1)]
-
-        print self.seedName
+        seedLabel = self.seedName[:18]
+        last = self.seedName[18:]
+        while len(last) >= 24:
+            seedLabel = seedLabel + '\n' + last[:24]
+            last = last[24:]
+        seedLabel = seedLabel + '\n' + last
+        self.seedNameShow.setText("\nSeed: "+seedLabel)
     
     def seedShow(self):
         signal = self.seed[0].signal
@@ -330,7 +318,7 @@ class Window(QtGui.QWidget):
 
     def playSeed(self):
         if sys.platform == 'darwin':
-            Popen(["afplay",pathJoin(cateLocation+self.cateName+WavLocation,self.seedName+'(inst)'+ '_1.wav')])
+            Popen(["afplay",os.path.join(WavLocation+self.cateName+'/inst/',self.seedName+'(inst)'+ '_1.wav')])
 
 
     def mashupLoadAtOnce(self):
@@ -490,7 +478,7 @@ class Window(QtGui.QWidget):
     def playMashuped(self):
         self.saveMashuped()
         if sys.platform == 'darwin':
-            Popen(["afplay",str(nameJoin(str(nameJoin('./normalized-',self.seedName)),'_mashupped.wav'))])
+            Popen(["afplay",str(nameJoin(self.seedName,'_mashupped(NORMALIZED).wav'))])
 
     def showMashuped(self):
         if len(self.mashuppedSig) >= 1 :
@@ -512,7 +500,6 @@ if __name__ == '__main__':
     print ' Data : ',DataLocationA
     print 'pgz(inst) : ', PgzLocation
     print 'pgz(vocal) : ', SongPgzLocation
-    print 'category list : ', cateLocation
     print 'wav : ', WavLocation
 
     app = QtGui.QApplication(sys.argv)

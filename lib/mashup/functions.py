@@ -17,7 +17,7 @@ def volume_adjust(input_file):
         '''
     
     FFMPEG_CMD = "ffmpeg-normalize"
-    cmd = FFMPEG_CMD + ' -v -f ' + input_file
+    cmd = FFMPEG_CMD + ' -v -f ' + input_file +' -o '+ input_file[:-4]+'(NORMALIZED).wav'
     p = subprocess.Popen(shlex.split(cmd))
     
 def fade_in(sig,sr,time=2500):
