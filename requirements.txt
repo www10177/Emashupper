@@ -1,0 +1,7 @@
+ffmpeg-normalize
+librosa
+matplotlib
+pyrubberband
+pydub
+dtw
+pandas
