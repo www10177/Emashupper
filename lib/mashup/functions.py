@@ -10,11 +10,8 @@ def volume_adjust(input_file):
     import subprocess
     import shlex
     '''
-        Command format: " ffmpeg-normalize -v <input> "
-        e.g. "ffmpeg-normalize -v ../wav/'Shape Of You (Instrumental)_2.wav'"
-        File will be named by " normalized-<input> "
-        e.g. "normalized-Shape Of You (Instrumental)_2.wav"
-        '''
+        Command format: " ffmpeg-normalize -v -f <input> -o <output>"
+    '''
     
     FFMPEG_CMD = "ffmpeg-normalize"
     cmd = FFMPEG_CMD + ' -v -f ' + input_file +' -o '+ input_file[:-4]+'(NORMALIZED).wav'
@@ -130,7 +127,7 @@ def beat_matching(candSig, candSr, seedSig, seedSr, vocalSig, vocalSr):
                 if index < 0 or index >= len(candSig):
                     break
                 else:
-                    resultSig[i] = vocalSig[index] * 0.5
+                    resultSig[i] = vocalSig[index]
 
             if j/degree == 0:
                 continue
@@ -200,10 +197,10 @@ def overlay(candSig, candSr, seedSig, seedSr, vocalSig, vocalSr):
 
     for i in xrange(len(seedSig)):
         if i >= len(resultSig):
-            shiftedSig = np.concatenate((resultSig, seedSig[i:] * 0.5))
+            shiftedSig = np.concatenate((resultSig, seedSig[i:]))
             break
         else:
-            resultSig[i] = resultSig[i] * 0.5 + seedSig[i] * 0.5
+            resultSig[i] = resultSig[i] + seedSig[i]
 
     return resultSig
 

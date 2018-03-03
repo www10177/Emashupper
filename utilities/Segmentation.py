@@ -39,7 +39,7 @@ def segment(fileLocation, toLocation,songLocation, songToLocation):
             print(boundaries)
             songBoundary[filename[:filename.rfind('(inst')]] = boundaries
             '''
-                pydub does things in milliseconds(ten_seconds = 10 * 1000)
+                Using unit in milliseconds(ten_seconds = 10 * 1000)
                 first_10_seconds = song[:ten_seconds]
                 last_5_seconds = song[-5000:]
             '''

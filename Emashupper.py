@@ -10,7 +10,7 @@ from pandas import read_csv
 import os
 from subprocess import call,Popen
 import numpy as np
-#import pygame
+import pygame
 import matplotlib.pyplot as plt
 import librosa.display
 
@@ -29,6 +29,9 @@ WavLocation= os.path.join(DataLocationA,'song/')
 from random import randint
 from PyQt4 import QtGui
 from PyQt4 import QtCore
+
+pygame.mixer.init()
+pygame.mixer.set_num_channels(2)
 
 LoadMode = 1
 # 0 would load pgz seperately, which might be slower but use less memory
@@ -97,7 +100,7 @@ class Window(QtGui.QWidget):
         self.listbox()
         self.actionElements()
         
-        self.graphicview = QtGui.QGraphicsView()  # 第一步，创建一个QGraphicsView
+        self.graphicview = QtGui.QGraphicsView()
         self.graphicview.setObjectName("graphicview")
 
 
@@ -105,13 +108,7 @@ class Window(QtGui.QWidget):
         # show all category list
         self.cateListWidget = QtGui.QListWidget(self)
         self.catelist = []
-#        for path,dir,files in os.walk(WavLocation):
-#            if 'inst' in dir: dir.remove('inst')
-#            if 'vocal' in dir: dir.remove('vocal')
-#            for cate in dir:
-#                self.cateListWidget.addItem(cate)
-#                self.catelist.append(cate)
-####here
+
         s=filter(lambda x: os.path.isdir(os.path.join(WavLocation, x)), os.listdir(WavLocation)) 
         for cate in s:
             self.cateListWidget.addItem(cate)
@@ -139,12 +136,7 @@ class Window(QtGui.QWidget):
             self.cateIndex = index
             self.cateName = str(value)
             print 'selected %d: "%s"' % (index, value)
-        
-        """
-            self.seedIndex = index
-            self.seedName = value
-            print 'selected %d: "%s"' % (index, value)
-        """
+  
     def actionElements(self):
         # initialze buttons,labels...
         seed_generate = QtGui.QPushButton("Generate Random Seed -> ")
@@ -154,15 +146,12 @@ class Window(QtGui.QWidget):
             background-color: rgba(255, 255, 255, 0);
             ''')
         seed_generate.clicked.connect(self.seedGenerate)
-        
-#        self.seedName = "i dont know/i dont know/i dont know"
 
         self.seedNameShow = QtGui.QLabel("\nSeed: ")
         self.seedNameShow.setFont(QtGui.QFont("Courier",15))
-#        seedNameShow.setStyleSheet('''
-#            background-image: url('./material/button.png');
-#            background-color: rgba(255, 255, 255, 0);
-#            ''')
+        
+        self.progressBar = QtGui.QLabel("\n")
+        self.progressBar.setFont(QtGui.QFont("Courier",15))
 
         load_file = QtGui.QPushButton("Load Candidate Segments ")
         load_file.setFont(QtGui.QFont("Courier",15))
@@ -179,6 +168,15 @@ class Window(QtGui.QWidget):
             background-color: rgba(255, 255, 255, 0);
             ''')
         play_seed.clicked.connect(self.playSeed)
+        
+        stop_seed = QtGui.QPushButton("Stop Playing Seed")
+        stop_seed.setFont(QtGui.QFont("Courier",15))
+        stop_seed.setStyleSheet('''
+            background-image: url('./material/button.png');
+            background-color: rgba(255, 255, 255, 0);
+            ''')
+        stop_seed.clicked.connect(self.stopPlaySeed)
+        
         show_seed = QtGui.QPushButton("Show Seed Wave")
         show_seed.setFont(QtGui.QFont("Courier",15))
         show_seed.setStyleSheet('''
@@ -203,6 +201,14 @@ class Window(QtGui.QWidget):
             ''')
         play_mash.clicked.connect(self.playMashuped)
         
+        stop_mash = QtGui.QPushButton("Stop Playing")
+        stop_mash.setFont(QtGui.QFont("Courier",15))
+        stop_mash.setStyleSheet('''
+            background-image: url('./material/button.png');
+            background-color: rgba(255, 255, 255, 0);
+            ''')
+        stop_mash.clicked.connect(self.stopPlayMashuped)
+        
         show_mash = QtGui.QPushButton("Show Mashupped Song Wave")
         show_mash.setFont(QtGui.QFont("Courier",15))
         show_mash.setStyleSheet('''
@@ -211,61 +217,55 @@ class Window(QtGui.QWidget):
             ''')
         show_mash.clicked.connect(self.showMashuped)
         
-        save_mash = QtGui.QPushButton("Save Mashupped Song")
-        save_mash.setFont(QtGui.QFont("Courier",15))
-        save_mash.setStyleSheet('''
-            background-image: url('./material/button.png');
-            background-color: rgba(255, 255, 255, 0);
-            ''')
-        save_mash.clicked.connect(self.saveMashuped)
-        
+#        save_mash = QtGui.QPushButton("Save Mashupped Song")
+#        save_mash.setFont(QtGui.QFont("Courier",15))
+#        save_mash.setStyleSheet('''
+#            background-image: url('./material/button.png');
+#            background-color: rgba(255, 255, 255, 0);
+#            ''')
+#        save_mash.clicked.connect(self.saveMashuped)
+
         
         layout0 = QtGui.QVBoxLayout()
         layout0.addWidget(seed_generate)
-#        layout0.addWidget(seedNameShow)
         layout0.setAlignment(QtCore.Qt.AlignTop)
-
-#        layout1 = QtGui.QVBoxLayout()
-#        layout1.addWidget(seedNameShow)
-#        layout1.setAlignment(QtCore.Qt.AlignTop)
 
         emp = QtGui.QLabel("")
         layout2 = QtGui.QVBoxLayout()
-#        layout2.setAlignment(QtCore.Qt.AlignCenter)
         layout2.setAlignment(QtCore.Qt.AlignTop)
-#        layout2.addLayout(layout1)
         layout2.addWidget(self.seedNameShow)
         layout2.addWidget(emp)
         layout2.addWidget(emp)
 #        layout2.addWidget(emp)
-        layout2.addWidget(emp)
         layout2.addWidget(load_file)
         layout2.addWidget(emp)
         layout2.addWidget(play_seed)
         layout2.addWidget(emp)
+        layout2.addWidget(stop_seed)
+        layout2.addWidget(emp)
         layout2.addWidget(show_seed)
 
         layout3 = QtGui.QVBoxLayout()
-        layout3.setAlignment(QtCore.Qt.AlignCenter)
+        layout3.setAlignment(QtCore.Qt.AlignTop)
+        layout3.addWidget(self.progressBar)
+        layout3.addWidget(emp)
+        layout3.addWidget(emp)
+#        layout3.addWidget(emp)
         layout3.addWidget(do_mash)
         layout3.addWidget(emp)
         layout3.addWidget(play_mash)
         layout3.addWidget(emp)
+        layout3.addWidget(stop_mash)
+        layout3.addWidget(emp)
         layout3.addWidget(show_mash)
-        layout3.addWidget(emp)
-        layout3.addWidget(save_mash)
-        layout3.addWidget(emp)
-        layout3.addWidget(emp)
-        layout3.addWidget(emp)
-        
+#        layout3.addWidget(emp)
+#        layout3.addWidget(save_mash)
 
         layout = QtGui.QHBoxLayout()
 #        layout2.addWidget(self.toolbar)
 #        layout2.addWidget(self.canvas)
 #        layout2.addStretch()
         layout.addLayout(layout0)
-#        layout.addStretch()
-#        layout.addLayout(layout1)
         layout.addStretch()
         layout.addLayout(layout2)
         layout.addStretch()
@@ -283,6 +283,7 @@ class Window(QtGui.QWidget):
             name = pathJoin(PgzLocation+self.cateName+'/inst/',self.seedName+'(inst)'+'_'+str(i+1)+'.pgz')
             self.seed[i] = pre.load(name)
             print 'loaded ',self.seed[i].name
+        self.progressBar.setText("\nDone Loading Segments.")
 
     def seedGenerate(self):
         #open the songlist(csv) of the chosen category, and show the ramdomly choice
@@ -317,9 +318,14 @@ class Window(QtGui.QWidget):
 #        plt.show()
 
     def playSeed(self):
-        if sys.platform == 'darwin':
-            Popen(["afplay",os.path.join(WavLocation+self.cateName+'/inst/',self.seedName+'(inst)'+ '_1.wav')])
+        seedsound = pygame.mixer.Sound(os.path.join(WavLocation+self.cateName+'/inst/',self.seedName+'(inst)'+ '_1.wav'))
+        if not pygame.mixer.Channel(1).get_busy():
+            pygame.mixer.Channel(1).play(seedsound)
+#        if sys.platform == 'darwin':
+#            Popen(["afplay",os.path.join(WavLocation+self.cateName+'/inst/',self.seedName+'(inst)'+ '_1.wav')])
 
+    def stopPlaySeed(self):
+        pygame.mixer.Channel(1).stop()
 
     def mashupLoadAtOnce(self):
         self.mashup = [None]*self.seedSegCount
@@ -335,12 +341,11 @@ class Window(QtGui.QWidget):
             for candSegIndex in xrange(1,self.csv['segmentation count'][candIndex]+1):
                 candSegPath = pathJoin(PgzLocation+self.cateName+'/inst/',candName+'(inst)'+'_'+str(candSegIndex)+'.pgz')
                 seg.append(pre.load(candSegPath))
-        print "loaded all seg"
+        print "loaded all segments"
 
         #Mashupping
         for seedSegNow in xrange(0,self.seedSegCount):
             # iterate all segmentations in seed song
-
             maxMashability = -1000
             maxSeg = None
             maxIndex = -1
@@ -359,13 +364,13 @@ class Window(QtGui.QWidget):
             vocalSegPath = pathJoin(SongPgzLocation+self.cateName+'/vocal/',maxSeg.name[:maxSeg.name.rfind('(inst')] + '(vocal)' + maxSeg.name[maxSeg.name.rfind('_'):]+'.pgz')
 
             print 'Mashed File: '+ maxSeg.name[:maxSeg.name.rfind('(inst')] + '(vocal)' + maxSeg.name[maxSeg.name.rfind('_'):]+'.wav'
-
+            
             if maxMashability >= threshold :
                 self.mashup[seedSegNow] = pre.load(vocalSegPath)
+            else:
+                print('Mashability = '+str(maxMashability)+' < Threshold , Skip ...')
 
-            else: print('Mashability', maxMashability ,'< Threshold , Skip ...')
-
-            print 'Mashed : #',seedSegNow+1 ,' of ', self.seedSegCount
+            print "Mashed : #"+str(seedSegNow+1)+" of "+str(self.seedSegCount)
 
             del seg[maxIndex]
 
@@ -394,6 +399,7 @@ class Window(QtGui.QWidget):
                     
         self.mashuppedSig = signal
         self.saveMashuped()
+        self.progressBar.setText("\nMashupped Song\nhas been saved.")
     
     
     def mashupLoadSeperately(self):
@@ -473,13 +479,18 @@ class Window(QtGui.QWidget):
         outputFile = str(nameJoin(str(nameJoin('./',self.seedName)),'_mashupped.wav'))
         librosa.output.write_wav(outputFile,self.mashuppedSig,self.seed[0].sr)
         mashup.volume_adjust(outputFile)
-        print ('Done processing mashupped song.')
-    
-    def playMashuped(self):
-        self.saveMashuped()
-        if sys.platform == 'darwin':
-            Popen(["afplay",str(nameJoin(self.seedName,'_mashupped(NORMALIZED).wav'))])
+        print ('\nDone processing mashupped song.')
 
+    def playMashuped(self):
+        mashsound = pygame.mixer.Sound(str(nameJoin(self.seedName,'_mashupped(NORMALIZED).wav')))
+        if not pygame.mixer.Channel(0).get_busy():
+            pygame.mixer.Channel(0).play(mashsound)
+#        if sys.platform == 'darwin':
+#            Popen(["afplay",str(nameJoin(self.seedName,'_mashupped(NORMALIZED).wav'))])
+
+    def stopPlayMashuped(self):
+        pygame.mixer.Channel(0).stop()
+                                    
     def showMashuped(self):
         if len(self.mashuppedSig) >= 1 :
             dr = Figure_Canvas()
@@ -497,7 +508,7 @@ class Window(QtGui.QWidget):
 
 if __name__ == '__main__':
 
-    print ' Data : ',DataLocationA
+    print 'Data : ',DataLocationA
     print 'pgz(inst) : ', PgzLocation
     print 'pgz(vocal) : ', SongPgzLocation
     print 'wav : ', WavLocation
