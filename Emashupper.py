@@ -96,13 +96,10 @@ class Window(QtGui.QWidget):
         palette1.setBrush(self.backgroundRole(), QtGui.QBrush(QtGui.QPixmap('./material/bg.jpg').scaledToHeight(540)))
         self.setPalette(palette1)
         self.setAutoFillBackground(True)
-    
         self.listbox()
         self.actionElements()
-        
-        self.graphicview = QtGui.QGraphicsView()
-        self.graphicview.setObjectName("graphicview")
-
+#        self.graphicview = QtGui.QGraphicsView()
+#        self.graphicview.setObjectName("graphicview")
 
     def listbox(self):
         # show all category list
@@ -153,7 +150,7 @@ class Window(QtGui.QWidget):
         self.progressBar = QtGui.QLabel("\n")
         self.progressBar.setFont(QtGui.QFont("Courier",15))
 
-        load_file = QtGui.QPushButton(" Load Seed Song Segments")
+        load_file = QtGui.QPushButton("Load Seed Song Segments ")
         load_file.setFont(QtGui.QFont("Courier",15))
         load_file.setStyleSheet('''
             background-image: url('./material/button.png');
@@ -227,7 +224,6 @@ class Window(QtGui.QWidget):
         layout2.addWidget(self.seedNameShow)
         layout2.addWidget(emp)
         layout2.addWidget(emp)
-#        layout2.addWidget(emp)
         layout2.addWidget(load_file)
         layout2.addWidget(emp)
         layout2.addWidget(play_seed)
@@ -250,9 +246,6 @@ class Window(QtGui.QWidget):
         layout3.addWidget(show_mash)
 
         layout = QtGui.QHBoxLayout()
-#        layout2.addWidget(self.toolbar)
-#        layout2.addWidget(self.canvas)
-#        layout2.addStretch()
         layout.addLayout(layout0)
         layout.addStretch()
         layout.addLayout(layout2)
