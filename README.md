@@ -1,11 +1,12 @@
 # Emashupper
 
 [Other file](https://goo.gl/38tSPf)
-
+# Dependencies
+1. Please Install PyQt4 Manually
+2. pip install -r requirements.txt
 # How to Preprecossing  
 1.  Put all music files in a folder
     * Make sure all music files is .wav (You can use mp3towav.py in utilities to convecrt mp3 to wav)   
-2.  Get category song list with listCate.py
 3.  Segment Music with Segmentation.py  
 4.  Calculate frame of songs with CalFrame.py
 5.  Doing preprocessing with Preprocessing.py

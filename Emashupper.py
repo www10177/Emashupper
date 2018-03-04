@@ -292,18 +292,20 @@ class Window(QtGui.QWidget):
         signal = self.seed[0].signal
         for i in self.seed[1:]:
             signal = np.concatenate((signal,i.signal))
+        
+        # dr = Figure_Canvas()
+        # dr.draw([[i for i in xrange(len(signal))],self.seed[0].sr], signal,'Seed Song Waveplot')
+        # graphicscene = QtGui.QGraphicsScene()
+        # graphicscene.addWidget(dr)
+        # self.graphicview.setScene(graphicscene)
+        # self.graphicview.setWindowTitle('Seed Song Waveplot')
+        # self.graphicview.show()
 
-        dr = Figure_Canvas()
-        dr.draw([[i for i in xrange(len(signal))],self.seed[0].sr], signal,'Seed Song Waveplot')
-        graphicscene = QtGui.QGraphicsScene()
-        graphicscene.addWidget(dr)
-        self.graphicview.setScene(graphicscene)
-        self.graphicview.setWindowTitle('Seed Song Waveplot')
-        self.graphicview.show()
+        librosa.display.waveplot(signal, sr=self.seed[0].sr)
+        plt.title('Seed Song Waveplot')
+        plt.show()
 
-#        librosa.display.waveplot(signal, sr=self.seed[0].sr)
-#        plt.title('Seed Wave')
-#        plt.show()
+
 
     def playSeed(self):
         seedsound = pygame.mixer.Sound(os.path.join(WavLocation+self.cateName+'/inst/',self.seedName+'(inst)'+ '_1.wav'))
@@ -481,16 +483,16 @@ class Window(QtGui.QWidget):
                                     
     def showMashuped(self):
         if len(self.mashuppedSig) >= 1 :
-            dr = Figure_Canvas()
-            dr.draw([[i for i in xrange(len(self.mashuppedSig))],self.seed[0].sr], self.mashuppedSig,'Mashupped Song Waveplot')
-            graphicscene = QtGui.QGraphicsScene()
-            graphicscene.addWidget(dr)
-            self.graphicview.setScene(graphicscene)
-            self.graphicview.setWindowTitle('Mashupped Song Waveplot')
-            self.graphicview.show()
-#            librosa.display.waveplot(self.mashuppedSig, sr=self.seed[0].sr)
-#            plt.title('Mashupped Wave')
-#            plt.show()
+            # dr = Figure_Canvas()
+            # dr.draw([[i for i in xrange(len(self.mashuppedSig))],self.seed[0].sr], self.mashuppedSig,'Mashupped Song Waveplot')
+            # graphicscene = QtGui.QGraphicsScene()
+            # graphicscene.addWidget(dr)
+            # self.graphicview.setScene(graphicscene)
+            # self.graphicview.setWindowTitle('Mashupped Song Waveplot')
+            # self.graphicview.show()
+            librosa.display.waveplot(self.mashuppedSig, sr=self.seed[0].sr)
+            plt.title('Mashupped Song Waveplot')
+            plt.show()
 
 ####################################################################
 
