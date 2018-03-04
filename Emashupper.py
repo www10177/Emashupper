@@ -12,7 +12,7 @@ from subprocess import call,Popen
 import numpy as np
 import pygame
 import matplotlib.pyplot as plt
-#import librosa.display
+import librosa.display
 
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
