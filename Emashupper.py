@@ -12,7 +12,7 @@ from subprocess import call,Popen
 import numpy as np
 import pygame
 import matplotlib.pyplot as plt
-import librosa.display
+#import librosa.display
 
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
@@ -153,7 +153,7 @@ class Window(QtGui.QWidget):
         self.progressBar = QtGui.QLabel("\n")
         self.progressBar.setFont(QtGui.QFont("Courier",15))
 
-        load_file = QtGui.QPushButton("Load Candidate Segments ")
+        load_file = QtGui.QPushButton(" Load Seed Song Segments")
         load_file.setFont(QtGui.QFont("Courier",15))
         load_file.setStyleSheet('''
             background-image: url('./material/button.png');
@@ -217,15 +217,6 @@ class Window(QtGui.QWidget):
             ''')
         show_mash.clicked.connect(self.showMashuped)
         
-#        save_mash = QtGui.QPushButton("Save Mashupped Song")
-#        save_mash.setFont(QtGui.QFont("Courier",15))
-#        save_mash.setStyleSheet('''
-#            background-image: url('./material/button.png');
-#            background-color: rgba(255, 255, 255, 0);
-#            ''')
-#        save_mash.clicked.connect(self.saveMashuped)
-
-        
         layout0 = QtGui.QVBoxLayout()
         layout0.addWidget(seed_generate)
         layout0.setAlignment(QtCore.Qt.AlignTop)
@@ -250,7 +241,6 @@ class Window(QtGui.QWidget):
         layout3.addWidget(self.progressBar)
         layout3.addWidget(emp)
         layout3.addWidget(emp)
-#        layout3.addWidget(emp)
         layout3.addWidget(do_mash)
         layout3.addWidget(emp)
         layout3.addWidget(play_mash)
@@ -258,8 +248,6 @@ class Window(QtGui.QWidget):
         layout3.addWidget(stop_mash)
         layout3.addWidget(emp)
         layout3.addWidget(show_mash)
-#        layout3.addWidget(emp)
-#        layout3.addWidget(save_mash)
 
         layout = QtGui.QHBoxLayout()
 #        layout2.addWidget(self.toolbar)
@@ -288,7 +276,7 @@ class Window(QtGui.QWidget):
     def seedGenerate(self):
         #open the songlist(csv) of the chosen category, and show the ramdomly choice
         self.csv = read_csv(PgzLocation+self.cateName+'/metadata.csv')
-        print self.cateName
+#        print self.cateName
         songs = [s.rstrip('\n') for s in self.csv['song name']]
         self.seedName = songs[randint(1,len(songs)-1)]
 
