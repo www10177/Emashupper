@@ -12,9 +12,7 @@ from sys import argv
 """
 
 songBoundary = {}
-
 def segment(fileLocation, toLocation,songLocation, songToLocation):
-
     print("Processing instrumental list...")
     for path, dir, files in os.walk(fileLocation):
         for filename in files:
@@ -23,7 +21,7 @@ def segment(fileLocation, toLocation,songLocation, songToLocation):
                 filename = os.path.splitext(filename)[0]
                 filename = filename+".wav"
                 sound.export(os.path.join(toLocation, filename), format="wav")
-            
+
             if not filename.endswith(".wav"):
                 print ("Please check your audio file type: " + filename)
                 continue
@@ -32,9 +30,7 @@ def segment(fileLocation, toLocation,songLocation, songToLocation):
             song = AudioSegment.from_wav(audio_file)
             print ('Segment ' + audio_file)
 
-            #signal, sr = librosa.load(audio_file,sr=None)
-            
-            # Segment the file using the default MSAF parameters
+            # Segment the file using default MSAF parameters
             boundaries, labels = msaf.process(audio_file)
             print(boundaries)
             songBoundary[filename[:filename.rfind('(inst')]] = boundaries
@@ -59,19 +55,7 @@ def segment(fileLocation, toLocation,songLocation, songToLocation):
                 out_format = filename.split('.')[-1]
                 segments[index].export(os.path.join(toLocation, output), format = out_format)
 
-            '''
-            # Sonify boundaries
-            sonified_file = audio_file.split('/')[-1].split('.')[-2]+"_sonified.wav"
-            sr = 44100
-            boundaries, labels = msaf.process(audio_file, sonify_bounds=True,
-                                              out_bounds=sonified_file, out_sr=sr)
-
-            # Listen to results
-            audio = librosa.load(sonified_file, sr=sr)[0]
-            IPython.display.Audio(audio, rate=sr)
-            '''
-
-    print("Processing song list...")
+    print("Processing vocal list...")
     for path, dir, files in os.walk(songLocation):
         for filename in files:
             if filename.endswith(".mp3"):
@@ -79,11 +63,11 @@ def segment(fileLocation, toLocation,songLocation, songToLocation):
                 filename = os.path.splitext(filename)[0]
                 filename = filename+".wav"
                 sound.export(os.path.join(songToLocation, filename), format="wav")
-            
+
             if not filename.endswith(".wav"):
                 print ("Please check your audio file type: " + filename)
                 continue
-                
+
             audio_file = os.path.join(path, filename)
             song = AudioSegment.from_wav(audio_file)
             print ('Segment ' + audio_file)
@@ -102,7 +86,7 @@ def segment(fileLocation, toLocation,songLocation, songToLocation):
                                          : min(boundaries[len(boundaries)-1], boundaries[index]+buff)])
                 else:
                     segments.append(song[boundaries[index-1]-buff:boundaries[index]+buff])
-    
+
             for index in xrange(len(segments)):
                 output = filename[:filename.rfind('.')] + '_' + str(index+1) + filename[filename.rfind('.'):]
                 out_format = filename.split('.')[-1]
@@ -111,7 +95,7 @@ def segment(fileLocation, toLocation,songLocation, songToLocation):
 
 if __name__ == "__main__":
     if len(argv) != 5:
-        print ("USAGE : python Segmentation.py $INST_FROM $INST_TO $SONG_FROM $SONG_TO ")
+        print ("USAGE : python Segmentation.py $INST_FROM $INST_TO $VOCAL_FROM $VOCAL_TO ")
         print (" This small program will convert *.wav/*.mp3 in subfolder of $FROM to *_(1..N).wav and save to $TO")
     else:
         segment(argv[1], argv[2], argv[3], argv[4])
